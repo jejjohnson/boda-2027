@@ -246,8 +246,13 @@
   footer .names{font-family:"Caveat",cursive;font-size:clamp(30px,8vw,42px)}
   footer p{font-size:13.5px;opacity:.85;margin-top:8px}
   footer a{color:var(--blush)}
-  footer .contact p{margin-top:6px;font-size:13.5px;line-height:1.7}
-  footer .contact a{white-space:nowrap}
+  footer .contact p{margin-top:8px;font-size:13.5px;line-height:1.7}
+  footer .cbtn{
+    appearance:none;font:inherit;font-size:12px;letter-spacing:.1em;text-transform:uppercase;
+    color:var(--cream);background:transparent;border:1px solid rgba(251,243,234,.55);
+    border-radius:999px;padding:5px 13px;margin:0 2px;cursor:pointer;
+  }
+  footer .cbtn:hover{background:rgba(251,243,234,.12)}
   footer .sep{width:70px;height:1px;background:rgba(251,243,234,.4);margin:18px auto}
 </style>
 </head>
@@ -476,12 +481,12 @@
   <div class="sep"></div>
   <p><span data-lang="es">¿Dudas? Escríbenos:</span><span data-lang="en">Questions? Message us:</span></p>
   <div class="contact">
-    <p><span data-lang="es">Emmanuel (novio)</span><span data-lang="en">Emmanuel (groom)</span> ·
-       <a class="lnk" href="mailto:emanjohnson91@gmail.com">emanjohnson91@gmail.com</a> ·
-       <a class="lnk" href="https://wa.me/34638113969" target="_blank" rel="noopener">WhatsApp +34 638 113 969</a></p>
-    <p><span data-lang="es">Sara (novia)</span><span data-lang="en">Sara (bride)</span> ·
-       <a class="lnk" href="mailto:sara.sbuezo@gmail.com">sara.sbuezo@gmail.com</a> ·
-       <a class="lnk" href="https://wa.me/34629186072" target="_blank" rel="noopener">WhatsApp +34 629 186 072</a></p>
+    <p><span data-lang="es">Emmanuel (novio)</span><span data-lang="en">Emmanuel (groom)</span>
+       <button type="button" class="cbtn" data-k="e" data-u="19nosnhojname" data-d="moc.liamg">Email</button>
+       <button type="button" class="cbtn" data-k="w" data-n="969311836">WhatsApp</button></p>
+    <p><span data-lang="es">Sara (novia)</span><span data-lang="en">Sara (bride)</span>
+       <button type="button" class="cbtn" data-k="e" data-u="ozeubs.aras" data-d="moc.liamg">Email</button>
+       <button type="button" class="cbtn" data-k="w" data-n="270681926">WhatsApp</button></p>
   </div>
   <p style="margin-top:14px;font-size:12px;opacity:.65">
     <span data-lang="es">Web actualizada por última vez en septiembre de 2026 — seguirá creciendo.</span>
@@ -517,6 +522,27 @@
     el.s.textContent = String(s%60).padStart(2,'0');
   }
   tick(); setInterval(tick,1000);
+
+  /* contacto: los datos no están en el HTML; se montan al pulsar (anti-scrapers) */
+  const r = x => x.split('').reverse().join('');
+  document.querySelectorAll('footer .cbtn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      let href, label;
+      if (btn.dataset.k === 'e') {
+        const addr = r(btn.dataset.u) + '@' + r(btn.dataset.d);
+        href = 'mailto:' + addr; label = addr;
+      } else {
+        const num = '34' + r(btn.dataset.n);
+        href = 'https://wa.me/' + num;
+        label = '+34 ' + num.slice(2).replace(/(\d{3})(\d{3})(\d{3})/, '$1 $2 $3');
+      }
+      const a = document.createElement('a');
+      a.href = href; a.textContent = label; a.className = 'lnk';
+      if (btn.dataset.k === 'w') { a.target = '_blank'; a.rel = 'noopener'; }
+      btn.replaceWith(a);
+      a.click();
+    });
+  });
 </script>
 </body>
 </html>
