@@ -1,0 +1,229 @@
+<title>Paletas Save the Date</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@125,700&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,600;1,9..144,300&family=Syne:wght@700;800&family=Manrope:wght@400;500;600;700&family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400&family=DM+Sans:ital,wght@0,400;0,500;1,400&display=swap">
+<style>
+  :root{--pg:#E9E5DD;--pg-ink:#24282B;--pg-muted:#6B6A64;--pg-line:#CFC9BD}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--pg);color:var(--pg-ink);font-family:"Manrope",system-ui,sans-serif;padding-block:32px 72px;padding-inline:clamp(16px,4vw,48px);line-height:1.5}
+  .wrap{max-width:1180px;margin:0 auto}
+  .head{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:16px;margin-bottom:28px}
+  h1{font-family:"Archivo",sans-serif;font-stretch:125%;font-weight:700;font-size:clamp(24px,3.5vw,34px);letter-spacing:-.01em}
+  .lede{max-width:62ch;color:var(--pg-muted);font-size:14px;margin-top:6px}
+  .lang{display:flex;border:1.5px solid var(--pg-ink);border-radius:999px;overflow:hidden;font-size:12px;letter-spacing:.08em}
+  .lang button{appearance:none;border:0;background:transparent;color:var(--pg-ink);font:inherit;font-weight:600;padding:7px 14px;cursor:pointer}
+  .lang button[aria-pressed="true"]{background:var(--pg-ink);color:var(--pg)}
+  .lang button:focus-visible{outline:2px solid #2B6E8C;outline-offset:-2px}
+  [data-lang]{display:none}
+  body.es [data-lang="es"],body.en [data-lang="en"]{display:block}
+  span[data-lang]{display:none}
+  body.es span[data-lang="es"],body.en span[data-lang="en"]{display:inline}
+
+  .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:40px 32px}
+  @media (max-width:940px){.grid{grid-template-columns:1fr}}
+  .slot{display:flex;flex-direction:column;align-items:center;gap:14px}
+  .label{width:min(430px,100%);display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap}
+  .label h2{font-family:"Archivo",sans-serif;font-stretch:125%;font-weight:700;font-size:16px}
+  .label .eyebrow{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--pg-muted);font-weight:600;display:block;margin-bottom:2px}
+  .chips{display:flex;gap:4px}
+  .chips i{width:18px;height:18px;border-radius:50%;display:block;border:1px solid rgba(0,0,0,.12)}
+  .read{width:min(430px,100%);font-size:13px;color:var(--pg-muted);line-height:1.5}
+  .read b{color:var(--pg-ink);font-weight:600}
+
+  /* ---------- the card: same structure as website/save-the-date/index.html ---------- */
+  .stage{width:min(430px,100%);padding:clamp(16px,3vw,28px);border-radius:10px;background:var(--bg);background-image:var(--bg-img,none);display:flex;justify-content:center}
+  .card{
+    width:100%;background:var(--card);color:var(--ink);border-radius:var(--radius,6px);
+    padding:clamp(24px,7vw,40px) clamp(20px,6vw,36px) clamp(28px,7vw,38px);
+    position:relative;overflow:hidden;
+    box-shadow:0 18px 50px -12px var(--shadow);border:1px solid var(--border);
+    font-family:var(--body),system-ui,sans-serif;line-height:1.5;
+  }
+  .card::before,.card::after{content:"";position:absolute;left:0;right:0;height:var(--band-h,8px);background:var(--band)}
+  .card::before{top:0}.card::after{bottom:0}
+  .kicker{font-family:var(--display);font-size:var(--kicker-size,13px);letter-spacing:var(--kicker-ls,.3em);text-transform:uppercase;color:var(--acc2);text-align:center;margin-top:14px;font-weight:var(--display-w,700)}
+  .names{font-family:var(--names);font-size:var(--names-size,clamp(44px,12vw,60px));line-height:.95;text-align:center;color:var(--title);margin:12px 0 4px;font-weight:var(--names-w,400);text-transform:var(--names-tt,none);letter-spacing:var(--names-ls,0)}
+  .names .amp{display:block;font-size:.5em;color:var(--grape);margin:4px 0;font-style:var(--amp-style,normal);font-weight:var(--amp-w,inherit);text-transform:none;letter-spacing:0}
+  .art{display:block;width:min(300px,82%);margin:18px auto 2px;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round;fill:none}
+  .art .line{stroke:var(--line-ink)} .art .vine{stroke:var(--vine)} .art .grape{stroke:var(--grape)} .art .glint{stroke:var(--acc2)}
+  .date{display:flex;align-items:center;justify-content:center;gap:clamp(10px,3vw,16px);border-top:2px solid var(--acc);border-bottom:2px solid var(--acc);padding:12px 0;margin:16px 0 14px}
+  .date .d{font-family:var(--display);font-weight:var(--display-w,700);font-size:clamp(44px,12vw,58px);line-height:.85;color:var(--date)}
+  .date .m{font-family:var(--display);font-weight:var(--display-w,700);font-size:clamp(13px,3.6vw,15px);letter-spacing:.2em;text-align:left;color:var(--ink)}
+  .date .m small{display:block;font-family:var(--body);font-weight:400;font-style:italic;letter-spacing:0;font-size:12px;color:var(--sub);margin-top:3px}
+  .where{text-align:center;font-size:clamp(14px,3.8vw,15px)}
+  .where strong{display:block;font-family:var(--display);font-weight:var(--display-w,700);font-size:clamp(17px,4.8vw,20px);letter-spacing:.12em;margin-bottom:2px;color:var(--ink)}
+  .where em{font-style:italic;color:var(--sub);font-size:13px}
+  .note{margin-top:16px;padding-top:14px;border-top:1px dashed var(--border);text-align:center;font-size:13px;color:var(--sub)}
+  .cta{display:block;margin:18px auto 0;width:fit-content;background:var(--cta);color:var(--cta-ink);text-decoration:none;font-family:var(--display);font-weight:var(--display-w,700);letter-spacing:.18em;font-size:13px;padding:13px 28px;border-radius:999px}
+  .url{margin-top:12px;text-align:center;font-size:12.5px;letter-spacing:.04em;color:var(--sub)}
+  .stamp{position:absolute;top:0;right:0;width:100px;height:100px;overflow:hidden;pointer-events:none}
+  .stamp b{position:absolute;top:26px;right:-38px;width:150px;display:block;text-align:center;transform:rotate(45deg);background:var(--stamp);color:var(--stamp-ink);font-family:var(--display);font-weight:var(--display-w,700);letter-spacing:.2em;text-indent:.2em;font-size:11px;line-height:1;padding:5px 0 4px;box-shadow:0 0 0 2.5px var(--card)}
+
+  /* ---------- 1 · Esparto & Mar ---------- */
+  .v1{
+    --bg:#E6DFD1;--card:#F3EEE4;--ink:#1F2A2E;--title:#1F5F8B;--date:#1F5F8B;--acc:#1F5F8B;--acc2:#6E7F3E;
+    --grape:#6B2737;--vine:#6E7F3E;--line-ink:#1F2A2E;--sub:#5D6266;--border:rgba(31,42,46,.22);--shadow:rgba(31,42,46,.25);
+    --band:repeating-linear-gradient(90deg,#C8A96E 0 6px,transparent 6px 12px);--band-h:6px;
+    --cta:#1F5F8B;--cta-ink:#F3EEE4;--stamp:#C8A96E;--stamp-ink:#1F2A2E;
+    --display:"Archivo",sans-serif;--body:"Manrope",sans-serif;--names:"Archivo",sans-serif;--names-w:700;--names-tt:uppercase;--names-ls:.02em;--names-size:clamp(36px,10vw,48px);
+  }
+  .v1 .kicker,.v1 .names,.v1 .date .d,.v1 .date .m,.v1 .where strong,.v1 .cta,.v1 .stamp b{font-stretch:125%}
+
+  /* ---------- 2 · Piedra & Vid ---------- */
+  .v2{
+    --bg:#CFC7BA;--card:#E4DED3;--ink:#3E4247;--title:#3E4247;--date:#5E2A3A;--acc:#2A7F8E;--acc2:#2A7F8E;
+    --grape:#5E2A3A;--vine:#8A9A5B;--line-ink:#3E4247;--sub:#6E7076;--border:rgba(62,66,71,.22);--shadow:rgba(62,66,71,.3);
+    --band:#2A7F8E;--band-h:4px;
+    --cta:#5E2A3A;--cta-ink:#E4DED3;--stamp:#8A9A5B;--stamp-ink:#1F2410;
+    --display:"Manrope",sans-serif;--display-w:700;--body:"Manrope",sans-serif;--names:"Fraunces",serif;--names-w:300;--names-size:clamp(50px,13vw,66px);--amp-style:italic;--amp-w:600;
+    --kicker-size:11px;--kicker-ls:.26em;
+  }
+
+  /* ---------- 3 · Marinera Contemporánea ---------- */
+  .v3{
+    --bg:#0A3558;--bg-img:radial-gradient(circle at 15% 10%,rgba(95,179,201,.25),transparent 45%);
+    --card:#0F4C81;--ink:#F7F5EF;--title:#F7F5EF;--date:#D8C39A;--acc:#5FB3C9;--acc2:#D8C39A;
+    --grape:#B4566E;--vine:#9AA86A;--line-ink:#F7F5EF;--sub:#B9CAD9;--border:rgba(247,245,239,.18);--shadow:rgba(0,0,0,.45);
+    --band:repeating-linear-gradient(90deg,#5FB3C9 0 20px,#D8C39A 20px 28px);--band-h:6px;
+    --cta:#8E3A52;--cta-ink:#F7F5EF;--stamp:#D8C39A;--stamp-ink:#0F2A38;
+    --display:"Syne",sans-serif;--display-w:800;--body:"Manrope",sans-serif;--names:"Syne",sans-serif;--names-w:800;--names-tt:uppercase;--names-ls:-.01em;--names-size:clamp(38px,10.5vw,50px);
+  }
+
+  /* ---------- 4 · Cal & Algodón ---------- */
+  .v4{
+    --bg:#E6DED0;--card:#F5F2EB;--ink:#2C3033;--title:#2C3033;--date:#632B3B;--acc:#2B6E8C;--acc2:#B8975A;
+    --grape:#632B3B;--vine:#A89F8E;--line-ink:#2C3033;--sub:#7A746A;--border:rgba(44,48,51,.18);--shadow:rgba(44,48,51,.22);
+    --band:#2B6E8C;--band-h:2px;--radius:2px;
+    --cta:#2C3033;--cta-ink:#F5F2EB;--stamp:#B8975A;--stamp-ink:#F5F2EB;
+    --display:"Manrope",sans-serif;--display-w:600;--body:"Manrope",sans-serif;--names:"Cormorant Garamond",serif;--names-w:400;--names-size:clamp(52px,14vw,70px);--amp-style:italic;
+    --kicker-size:11px;--kicker-ls:.3em;
+  }
+  .v4 .date{border-top-width:1px;border-bottom-width:1px}
+</style>
+
+<div class="wrap">
+  <div class="head">
+    <div>
+      <h1>Save the Date · cuatro paletas</h1>
+      <p class="lede">La misma tarjeta (estructura, texto e ilustración del <code>index.html</code> actual) con cada paleta aplicada. Todas llevan un <b>granate de uva</b>: en los racimos y el «&amp;» siempre, y en el número o el botón donde aguanta.</p>
+    </div>
+    <div class="lang" role="group" aria-label="Idioma / Language">
+      <button id="btn-es" aria-pressed="true">ES</button>
+      <button id="btn-en" aria-pressed="false">EN</button>
+    </div>
+  </div>
+
+  <div class="grid">
+
+    <!-- ===== 1 ===== -->
+    <section class="slot v1">
+      <div class="label"><div><span class="eyebrow">Candidata 1</span><h2>Esparto &amp; Mar</h2></div>
+        <div class="chips"><i style="background:#F3EEE4"></i><i style="background:#1F5F8B"></i><i style="background:#C8A96E"></i><i style="background:#6E7F3E"></i><i style="background:#6B2737"></i></div></div>
+      <div class="stage"><main class="card">
+        <div class="stamp"><b>2027</b></div>
+        <p class="kicker"><span data-lang="es">Nos casamos</span><span data-lang="en">We're getting married</span></p>
+        <h1 class="names">Sara <span class="amp">&amp;</span> Emmanuel</h1>
+        <svg class="art" viewBox="0 0 300 96" aria-hidden="true">
+          <g transform="translate(-62,6)"><g class="vine"><path d="M84 16c4-5 11-6 15-2"/><path d="M91 22c3-4 9-5 13-2"/></g>
+            <g class="grape"><circle cx="88" cy="30" r="6"/><circle cx="100" cy="30" r="6"/><circle cx="94" cy="40" r="6"/><circle cx="106" cy="40" r="6"/><circle cx="82" cy="40" r="6"/><circle cx="88" cy="50" r="6"/><circle cx="100" cy="50" r="6"/><circle cx="94" cy="60" r="6"/></g></g>
+          <g transform="translate(104,8)"><path class="vine" d="M13 4h12v4h-12z"/><path class="line" d="M14 10h10v14c0 5 8 8 8 17v29c0 3-2 5-5 5H11c-3 0-5-2-5-5V41c0-9 8-12 8-17V10z"/><path class="glint" d="M6 48h26M6 62h26" stroke-width="2"/></g>
+          <g class="line" transform="translate(196,20) rotate(20)"><path d="M0 0h26c0 10-5.5 16-13 17.5C5.5 16 0 10 0 0z"/><path d="M13 17.5V30M4 30h18"/></g>
+          <g class="line" transform="translate(228,28) rotate(-20)"><path d="M0 0h26c0 10-5.5 16-13 17.5C5.5 16 0 10 0 0z"/><path d="M13 17.5V30M4 30h18"/></g>
+          <g class="glint" stroke-width="2.2"><path d="M224 8v-7M215 12l-5-5M234 12l5-5"/></g>
+          <path class="grape" d="M78 16c-3-4-9-1-6 3l6 6 6-6c3-4-3-7-6-3z" stroke-width="2"/>
+        </svg>
+        <div class="date"><span class="d">05</span><span class="m"><span data-lang="es">Junio<br>2027</span><span data-lang="en">June<br>2027</span><small><span data-lang="es">Sábado</span><span data-lang="en">Saturday</span></small></span></div>
+        <p class="where"><strong>Vilasira</strong>Venta del Moro · Valencia · <span data-lang="es">España</span><span data-lang="en">Spain</span><br><em><span data-lang="es">Hora por confirmar</span><span data-lang="en">Time to be confirmed</span></em></p>
+        <p class="note"><span data-lang="es">Guarda la fecha — toda la información (viaje, alojamiento, autobús desde Requena) irá creciendo en la web.</span><span data-lang="en">Save the date — travel, lodging and the Requena shuttle details will keep growing on the website.</span></p>
+        <a class="cta" href="#"><span data-lang="es">Ver la web</span><span data-lang="en">Open the website</span></a>
+        <p class="url">jejjohnson.github.io/boda-2027</p>
+      </main></div>
+      <p class="read"><b>Granate:</b> racimos, «&amp;» y corazón. Todo lo demás en azul mar y esparto (bandas y lazo). Es la que reparte mejor los tres ejes.</p>
+    </section>
+
+    <!-- ===== 2 ===== -->
+    <section class="slot v2">
+      <div class="label"><div><span class="eyebrow">Candidata 2</span><h2>Piedra &amp; Vid</h2></div>
+        <div class="chips"><i style="background:#E4DED3"></i><i style="background:#2A7F8E"></i><i style="background:#8A9A5B"></i><i style="background:#3E4247"></i><i style="background:#5E2A3A"></i></div></div>
+      <div class="stage"><main class="card">
+        <div class="stamp"><b>2027</b></div>
+        <p class="kicker"><span data-lang="es">Nos casamos</span><span data-lang="en">We're getting married</span></p>
+        <h1 class="names">Sara <span class="amp">&amp;</span> Emmanuel</h1>
+        <svg class="art" viewBox="0 0 300 96" aria-hidden="true">
+          <g transform="translate(-62,6)"><g class="vine"><path d="M84 16c4-5 11-6 15-2"/><path d="M91 22c3-4 9-5 13-2"/></g>
+            <g class="grape"><circle cx="88" cy="30" r="6"/><circle cx="100" cy="30" r="6"/><circle cx="94" cy="40" r="6"/><circle cx="106" cy="40" r="6"/><circle cx="82" cy="40" r="6"/><circle cx="88" cy="50" r="6"/><circle cx="100" cy="50" r="6"/><circle cx="94" cy="60" r="6"/></g></g>
+          <g transform="translate(104,8)"><path class="vine" d="M13 4h12v4h-12z"/><path class="line" d="M14 10h10v14c0 5 8 8 8 17v29c0 3-2 5-5 5H11c-3 0-5-2-5-5V41c0-9 8-12 8-17V10z"/><path class="glint" d="M6 48h26M6 62h26" stroke-width="2"/></g>
+          <g class="line" transform="translate(196,20) rotate(20)"><path d="M0 0h26c0 10-5.5 16-13 17.5C5.5 16 0 10 0 0z"/><path d="M13 17.5V30M4 30h18"/></g>
+          <g class="line" transform="translate(228,28) rotate(-20)"><path d="M0 0h26c0 10-5.5 16-13 17.5C5.5 16 0 10 0 0z"/><path d="M13 17.5V30M4 30h18"/></g>
+          <g class="glint" stroke-width="2.2"><path d="M224 8v-7M215 12l-5-5M234 12l5-5"/></g>
+          <path class="grape" d="M78 16c-3-4-9-1-6 3l6 6 6-6c3-4-3-7-6-3z" stroke-width="2"/>
+        </svg>
+        <div class="date"><span class="d">05</span><span class="m"><span data-lang="es">Junio<br>2027</span><span data-lang="en">June<br>2027</span><small><span data-lang="es">Sábado</span><span data-lang="en">Saturday</span></small></span></div>
+        <p class="where"><strong>Vilasira</strong>Venta del Moro · Valencia · <span data-lang="es">España</span><span data-lang="en">Spain</span><br><em><span data-lang="es">Hora por confirmar</span><span data-lang="en">Time to be confirmed</span></em></p>
+        <p class="note"><span data-lang="es">Guarda la fecha — toda la información (viaje, alojamiento, autobús desde Requena) irá creciendo en la web.</span><span data-lang="en">Save the date — travel, lodging and the Requena shuttle details will keep growing on the website.</span></p>
+        <a class="cta" href="#"><span data-lang="es">Ver la web</span><span data-lang="en">Open the website</span></a>
+        <p class="url">jejjohnson.github.io/boda-2027</p>
+      </main></div>
+      <p class="read"><b>Granate:</b> aquí manda más — número de la fecha, botón y racimos. El teal queda de reglas y filo. Sobre piedra, granate + teal es la pareja más «bodega».</p>
+    </section>
+
+    <!-- ===== 3 ===== -->
+    <section class="slot v3">
+      <div class="label"><div><span class="eyebrow">Candidata 3</span><h2>Marinera Contemporánea</h2></div>
+        <div class="chips"><i style="background:#0F4C81"></i><i style="background:#5FB3C9"></i><i style="background:#D8C39A"></i><i style="background:#7A8450"></i><i style="background:#8E3A52"></i></div></div>
+      <div class="stage"><main class="card">
+        <div class="stamp"><b>2027</b></div>
+        <p class="kicker"><span data-lang="es">Nos casamos</span><span data-lang="en">We're getting married</span></p>
+        <h1 class="names">Sara <span class="amp">&amp;</span> Emmanuel</h1>
+        <svg class="art" viewBox="0 0 300 96" aria-hidden="true">
+          <g transform="translate(-62,6)"><g class="vine"><path d="M84 16c4-5 11-6 15-2"/><path d="M91 22c3-4 9-5 13-2"/></g>
+            <g class="grape"><circle cx="88" cy="30" r="6"/><circle cx="100" cy="30" r="6"/><circle cx="94" cy="40" r="6"/><circle cx="106" cy="40" r="6"/><circle cx="82" cy="40" r="6"/><circle cx="88" cy="50" r="6"/><circle cx="100" cy="50" r="6"/><circle cx="94" cy="60" r="6"/></g></g>
+          <g transform="translate(104,8)"><path class="vine" d="M13 4h12v4h-12z"/><path class="line" d="M14 10h10v14c0 5 8 8 8 17v29c0 3-2 5-5 5H11c-3 0-5-2-5-5V41c0-9 8-12 8-17V10z"/><path class="glint" d="M6 48h26M6 62h26" stroke-width="2"/></g>
+          <g class="line" transform="translate(196,20) rotate(20)"><path d="M0 0h26c0 10-5.5 16-13 17.5C5.5 16 0 10 0 0z"/><path d="M13 17.5V30M4 30h18"/></g>
+          <g class="line" transform="translate(228,28) rotate(-20)"><path d="M0 0h26c0 10-5.5 16-13 17.5C5.5 16 0 10 0 0z"/><path d="M13 17.5V30M4 30h18"/></g>
+          <g class="glint" stroke-width="2.2"><path d="M224 8v-7M215 12l-5-5M234 12l5-5"/></g>
+          <path class="grape" d="M78 16c-3-4-9-1-6 3l6 6 6-6c3-4-3-7-6-3z" stroke-width="2"/>
+        </svg>
+        <div class="date"><span class="d">05</span><span class="m"><span data-lang="es">Junio<br>2027</span><span data-lang="en">June<br>2027</span><small><span data-lang="es">Sábado</span><span data-lang="en">Saturday</span></small></span></div>
+        <p class="where"><strong>Vilasira</strong>Venta del Moro · Valencia · <span data-lang="es">España</span><span data-lang="en">Spain</span><br><em><span data-lang="es">Hora por confirmar</span><span data-lang="en">Time to be confirmed</span></em></p>
+        <p class="note"><span data-lang="es">Guarda la fecha — toda la información (viaje, alojamiento, autobús desde Requena) irá creciendo en la web.</span><span data-lang="en">Save the date — travel, lodging and the Requena shuttle details will keep growing on the website.</span></p>
+        <a class="cta" href="#"><span data-lang="es">Ver la web</span><span data-lang="en">Open the website</span></a>
+        <p class="url">jejjohnson.github.io/boda-2027</p>
+      </main></div>
+      <p class="read"><b>Granate:</b> sobre azul oscuro el granate puro desaparece, así que va aclarado (rosa-granate) en racimos y botón. Es la única donde el granate cambia de tono para sobrevivir.</p>
+    </section>
+
+    <!-- ===== 4 ===== -->
+    <section class="slot v4">
+      <div class="label"><div><span class="eyebrow">Candidata 4</span><h2>Cal &amp; Algodón</h2></div>
+        <div class="chips"><i style="background:#F5F2EB"></i><i style="background:#E6DED0"></i><i style="background:#B8975A"></i><i style="background:#2B6E8C"></i><i style="background:#632B3B"></i></div></div>
+      <div class="stage"><main class="card">
+        <div class="stamp"><b>2027</b></div>
+        <p class="kicker"><span data-lang="es">Nos casamos</span><span data-lang="en">We're getting married</span></p>
+        <h1 class="names">Sara <span class="amp">&amp;</span> Emmanuel</h1>
+        <svg class="art" viewBox="0 0 300 96" aria-hidden="true">
+          <g transform="translate(-62,6)"><g class="vine"><path d="M84 16c4-5 11-6 15-2"/><path d="M91 22c3-4 9-5 13-2"/></g>
+            <g class="grape"><circle cx="88" cy="30" r="6"/><circle cx="100" cy="30" r="6"/><circle cx="94" cy="40" r="6"/><circle cx="106" cy="40" r="6"/><circle cx="82" cy="40" r="6"/><circle cx="88" cy="50" r="6"/><circle cx="100" cy="50" r="6"/><circle cx="94" cy="60" r="6"/></g></g>
+          <g transform="translate(104,8)"><path class="vine" d="M13 4h12v4h-12z"/><path class="line" d="M14 10h10v14c0 5 8 8 8 17v29c0 3-2 5-5 5H11c-3 0-5-2-5-5V41c0-9 8-12 8-17V10z"/><path class="glint" d="M6 48h26M6 62h26" stroke-width="2"/></g>
+          <g class="line" transform="translate(196,20) rotate(20)"><path d="M0 0h26c0 10-5.5 16-13 17.5C5.5 16 0 10 0 0z"/><path d="M13 17.5V30M4 30h18"/></g>
+          <g class="line" transform="translate(228,28) rotate(-20)"><path d="M0 0h26c0 10-5.5 16-13 17.5C5.5 16 0 10 0 0z"/><path d="M13 17.5V30M4 30h18"/></g>
+          <g class="glint" stroke-width="2.2"><path d="M224 8v-7M215 12l-5-5M234 12l5-5"/></g>
+          <path class="grape" d="M78 16c-3-4-9-1-6 3l6 6 6-6c3-4-3-7-6-3z" stroke-width="2"/>
+        </svg>
+        <div class="date"><span class="d">05</span><span class="m"><span data-lang="es">Junio<br>2027</span><span data-lang="en">June<br>2027</span><small><span data-lang="es">Sábado</span><span data-lang="en">Saturday</span></small></span></div>
+        <p class="where"><strong>Vilasira</strong>Venta del Moro · Valencia · <span data-lang="es">España</span><span data-lang="en">Spain</span><br><em><span data-lang="es">Hora por confirmar</span><span data-lang="en">Time to be confirmed</span></em></p>
+        <p class="note"><span data-lang="es">Guarda la fecha — toda la información (viaje, alojamiento, autobús desde Requena) irá creciendo en la web.</span><span data-lang="en">Save the date — travel, lodging and the Requena shuttle details will keep growing on the website.</span></p>
+        <a class="cta" href="#"><span data-lang="es">Ver la web</span><span data-lang="en">Open the website</span></a>
+        <p class="url">jejjohnson.github.io/boda-2027</p>
+      </main></div>
+      <p class="read"><b>Granate:</b> número de la fecha, racimos y «&amp;»; el mar queda reducido a dos líneas finas. Neutros, un granate y un hilo azul — la más sobria.</p>
+    </section>
+
+  </div>
+</div>
+
+<script>
+  const b = document.body, es = document.getElementById('btn-es'), en = document.getElementById('btn-en');
+  function set(l){ b.className = l; es.setAttribute('aria-pressed', l === 'es'); en.setAttribute('aria-pressed', l === 'en'); }
+  set('es');
+  es.onclick = () => set('es');
+  en.onclick = () => set('en');
+</script>

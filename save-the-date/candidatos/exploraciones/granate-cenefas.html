@@ -1,0 +1,123 @@
+<title>Save the Date Granate</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Caveat:wght@500;700&family=DM+Sans:ital,wght@0,400;0,500;1,400&display=swap">
+<style>
+  :root{--pg:#E9E5DD;--pg-ink:#24282B;--pg-muted:#6B6A64}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--pg);color:var(--pg-ink);font-family:"DM Sans",system-ui,sans-serif;padding-block:32px 72px;padding-inline:clamp(16px,4vw,48px);line-height:1.5}
+  .wrap{max-width:1400px;margin:0 auto}
+  .head{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:16px;margin-bottom:28px}
+  h1{font-family:"Bebas Neue",Impact,sans-serif;font-weight:400;font-size:clamp(28px,3.5vw,38px);letter-spacing:.06em}
+  .lede{max-width:64ch;color:var(--pg-muted);font-size:14px;margin-top:4px}
+  .lede b{color:var(--pg-ink);font-weight:500}
+  .lang{display:flex;border:1.5px solid var(--pg-ink);border-radius:999px;overflow:hidden;font-size:12px;letter-spacing:.08em}
+  .lang button{appearance:none;border:0;background:transparent;color:var(--pg-ink);font:inherit;font-weight:500;padding:7px 14px;cursor:pointer}
+  .lang button[aria-pressed="true"]{background:var(--pg-ink);color:var(--pg)}
+  .lang button:focus-visible{outline:2px solid #6B1F2E;outline-offset:-2px}
+  [data-lang]{display:none}
+  body.es [data-lang="es"],body.en [data-lang="en"]{display:block}
+  span[data-lang]{display:none}
+  body.es span[data-lang="es"],body.en span[data-lang="en"]{display:inline}
+
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:36px 24px}
+  .slot{display:flex;flex-direction:column;align-items:center;gap:12px}
+  .slot.ref{opacity:.8}
+  .label{width:100%;max-width:430px}
+  .label .eyebrow{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--pg-muted);font-weight:500;display:block}
+  .label h2{font-family:"Bebas Neue",Impact,sans-serif;font-weight:400;font-size:22px;letter-spacing:.06em}
+  .read{width:100%;max-width:430px;font-size:13px;color:var(--pg-muted)}
+
+  /* ---- the card, as in website/save-the-date/index.html ---- */
+  .stage{width:100%;max-width:430px;padding:clamp(14px,3vw,24px);border-radius:10px;background:var(--paper);
+    background-image:radial-gradient(circle at 12% 8%,var(--glow1),transparent 45%),radial-gradient(circle at 88% 92%,var(--glow2),transparent 45%)}
+  .card{width:100%;background:var(--cream);color:var(--ink);border-radius:6px;padding:clamp(24px,7vw,40px) clamp(20px,6vw,36px) clamp(28px,7vw,38px);
+    position:relative;overflow:hidden;box-shadow:0 18px 50px -12px var(--shadow),0 2px 0 var(--red) inset;border:1px solid var(--border);line-height:1.5}
+  .card::before,.card::after{content:"";position:absolute;left:0;right:0;height:var(--band-h,10px);background:var(--band)}
+  .card::before{top:0}.card::after{bottom:0}
+  .kicker{font-family:"Bebas Neue",Impact,sans-serif;font-size:clamp(13px,3.4vw,15px);letter-spacing:.34em;color:var(--olive);text-align:center;margin-top:14px}
+  .names{font-family:"Caveat",cursive;font-weight:700;font-size:clamp(46px,13vw,68px);line-height:.95;text-align:center;color:var(--red);margin:10px 0 4px}
+  .names .amp{display:block;font-size:.5em;color:var(--gold);margin:2px 0}
+  .art{display:block;width:min(300px,82%);margin:18px auto 2px;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round;fill:none}
+  .art .line{stroke:var(--red)} .art .vine{stroke:var(--olive)} .art .grape{stroke:var(--ink)} .art .glint{stroke:var(--gold)}
+  .date{display:flex;align-items:center;justify-content:center;gap:clamp(10px,3vw,16px);border-top:2px solid var(--red);border-bottom:2px solid var(--red);padding:12px 0;margin:16px 0 14px}
+  .date .d{font-family:"Bebas Neue",Impact,sans-serif;font-size:clamp(44px,12vw,60px);line-height:.85;color:var(--red)}
+  .date .m{font-family:"Bebas Neue",Impact,sans-serif;font-size:clamp(15px,4vw,18px);letter-spacing:.22em;text-align:left}
+  .date .m small{display:block;font-family:"DM Sans",sans-serif;font-style:italic;letter-spacing:0;font-size:12px;color:var(--olive);margin-top:3px}
+  .where{text-align:center;font-size:clamp(14px,3.8vw,16px)}
+  .where strong{display:block;font-family:"Bebas Neue",Impact,sans-serif;font-size:clamp(20px,5.4vw,24px);letter-spacing:.12em;margin-bottom:2px}
+  .where em{font-style:italic;color:var(--olive);font-size:13px}
+  .note{margin-top:16px;padding-top:14px;border-top:1px dashed var(--border);text-align:center;font-size:13px;color:var(--olive)}
+  .cta{display:block;margin:18px auto 0;width:fit-content;background:var(--red);color:var(--cream);text-decoration:none;font-family:"Bebas Neue",Impact,sans-serif;letter-spacing:.2em;font-size:clamp(15px,4vw,17px);padding:13px 30px;border-radius:999px;box-shadow:0 6px 0 var(--ink)}
+  .url{margin-top:12px;text-align:center;font-size:12.5px;letter-spacing:.04em;color:var(--olive)}
+  .stamp{position:absolute;top:0;right:0;width:100px;height:100px;overflow:hidden;pointer-events:none}
+  .stamp b{position:absolute;top:26px;right:-38px;width:150px;display:block;text-align:center;transform:rotate(45deg);background:var(--olive);color:var(--cream);font-family:"Bebas Neue",Impact,sans-serif;font-weight:400;letter-spacing:.2em;text-indent:.2em;font-size:11px;line-height:1;padding:5px 0 4px;box-shadow:0 0 0 2.5px var(--cream)}
+
+  /* ---- 0 · original (reference) ---- */
+  .v0{--ink:#8C1007;--red:#C1121F;--cream:#FFF6EC;--paper:#FDEFE0;--olive:#5B6B3A;--gold:#D9A441;--shadow:rgba(140,16,7,.18);--border:rgba(140,16,7,.25);
+    --glow1:rgba(217,164,65,.16);--glow2:rgba(193,18,31,.12);
+    --band:repeating-linear-gradient(90deg,#C1121F 0 14px,transparent 14px 28px)}
+
+  /* ---- granate base shared by A, B, C ---- */
+  .g{--ink:#4A1420;--red:#6B1F2E;--cream:#FFF6EC;--paper:#F6E9DD;--olive:#5B6B3A;--gold:#C9A050;--shadow:rgba(74,20,32,.2);--border:rgba(107,31,46,.3);
+    --glow1:rgba(201,160,80,.18);--glow2:rgba(107,31,46,.14)}
+
+  /* A · cuerda de esparto: doble hilo fino */
+  .vA{--band-h:7px;--band:linear-gradient(#C9A050 0 2px,transparent 2px 5px,#C9A050 5px 7px)}
+  /* B · hilera de viña: puntitos granate = uvas */
+  .vB{--band-h:10px;--band:radial-gradient(circle at 50% 50%,#6B1F2E 2.6px,transparent 3px) 0 0/12px 10px repeat-x}
+  /* C · sin cenefa: una sola banda granate lisa */
+  .vC{--band-h:8px;--band:#6B1F2E}
+  .vC .card{box-shadow:0 18px 50px -12px var(--shadow)}
+</style>
+
+<div class="wrap">
+  <div class="head">
+    <div>
+      <h1>Save the Date · granate</h1>
+      <p class="lede">La tarjeta original tal cual, con el rojo tomate sustituido por <b>granate de uva</b> (#6B1F2E, tinta #4A1420) y el oro un punto más esparto. Lo único que cambia entre A, B y C es la cenefa de arriba y abajo, que sustituye a las rayas de mantel.</p>
+    </div>
+    <div class="lang" role="group" aria-label="Idioma / Language"><button id="btn-es" aria-pressed="true">ES</button><button id="btn-en" aria-pressed="false">EN</button></div>
+  </div>
+
+  <div class="grid" id="grid"></div>
+</div>
+
+<template id="card">
+  <main class="card">
+    <div class="stamp"><b>2027</b></div>
+    <p class="kicker"><span data-lang="es">NOS CASAMOS</span><span data-lang="en">WE'RE GETTING MARRIED</span></p>
+    <h1 class="names">Sara <span class="amp">&amp;</span> Emmanuel</h1>
+    <svg class="art" viewBox="0 0 300 96" aria-hidden="true">
+      <g transform="translate(-62,6)"><g class="vine"><path d="M84 16c4-5 11-6 15-2"/><path d="M91 22c3-4 9-5 13-2"/></g>
+        <g class="grape"><circle cx="88" cy="30" r="6"/><circle cx="100" cy="30" r="6"/><circle cx="94" cy="40" r="6"/><circle cx="106" cy="40" r="6"/><circle cx="82" cy="40" r="6"/><circle cx="88" cy="50" r="6"/><circle cx="100" cy="50" r="6"/><circle cx="94" cy="60" r="6"/></g></g>
+      <g transform="translate(104,8)"><path class="vine" d="M13 4h12v4h-12z"/><path class="line" d="M14 10h10v14c0 5 8 8 8 17v29c0 3-2 5-5 5H11c-3 0-5-2-5-5V41c0-9 8-12 8-17V10z"/><path class="glint" d="M6 48h26M6 62h26" stroke-width="2"/></g>
+      <g class="line" transform="translate(196,20) rotate(20)"><path d="M0 0h26c0 10-5.5 16-13 17.5C5.5 16 0 10 0 0z"/><path d="M13 17.5V30M4 30h18"/></g>
+      <g class="line" transform="translate(228,28) rotate(-20)"><path d="M0 0h26c0 10-5.5 16-13 17.5C5.5 16 0 10 0 0z"/><path d="M13 17.5V30M4 30h18"/></g>
+      <g class="glint" stroke-width="2.2"><path d="M224 8v-7M215 12l-5-5M234 12l5-5"/></g>
+      <path class="line" d="M78 16c-3-4-9-1-6 3l6 6 6-6c3-4-3-7-6-3z" stroke-width="2"/>
+    </svg>
+    <div class="date"><span class="d">05</span><span class="m"><span data-lang="es">JUNIO<br>2027</span><span data-lang="en">JUNE<br>2027</span><small><span data-lang="es">Sábado</span><span data-lang="en">Saturday</span></small></span></div>
+    <p class="where"><strong>VILASIRA</strong>Venta del Moro · Valencia · <span data-lang="es">España</span><span data-lang="en">Spain</span><br><em><span data-lang="es">Hora por confirmar</span><span data-lang="en">Time to be confirmed</span></em></p>
+    <p class="note"><span data-lang="es">Guarda la fecha — toda la información (viaje, alojamiento, autobús desde Requena) irá creciendo en la web.</span><span data-lang="en">Save the date — travel, lodging and the Requena shuttle details will keep growing on the website.</span></p>
+    <a class="cta" href="#"><span data-lang="es">VER LA WEB</span><span data-lang="en">OPEN THE WEBSITE</span></a>
+    <p class="url">jejjohnson.github.io/boda-2027</p>
+  </main>
+</template>
+
+<script>
+  const variants = [
+    {cls:'v0', ref:true, eyebrow:'Referencia', name:'Original (rojo + mantel)', read:'La de partida. Rojo #C1121F, rayas de mantel arriba y abajo.'},
+    {cls:'g vA', eyebrow:'Opción A', name:'Cuerda de esparto', read:'Doble hilo fino color esparto. Lo más discreto y lo más «material»; el granate lo ponen los nombres, la fecha y el botón.'},
+    {cls:'g vB', eyebrow:'Opción B', name:'Hilera de viña', read:'Puntitos granate como una hilera de uvas. Sigue el motivo del dibujo y no recuerda a ningún mantel.'},
+    {cls:'g vC', eyebrow:'Opción C', name:'Banda lisa', read:'Una banda granate sin dibujo. La más moderna; toda la personalidad queda en la caligrafía y la ilustración.'},
+  ];
+  const grid = document.getElementById('grid'), tpl = document.getElementById('card');
+  for (const v of variants){
+    const s = document.createElement('section'); s.className = 'slot ' + v.cls + (v.ref ? ' ref' : '');
+    s.innerHTML = `<div class="label"><span class="eyebrow">${v.eyebrow}</span><h2>${v.name}</h2></div><div class="stage"></div><p class="read">${v.read}</p>`;
+    s.querySelector('.stage').appendChild(tpl.content.cloneNode(true));
+    grid.appendChild(s);
+  }
+  const b = document.body, es = document.getElementById('btn-es'), en = document.getElementById('btn-en');
+  function set(l){ b.className = l; es.setAttribute('aria-pressed', l === 'es'); en.setAttribute('aria-pressed', l === 'en'); }
+  set('es'); es.onclick = () => set('es'); en.onclick = () => set('en');
+</script>

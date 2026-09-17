@@ -1,0 +1,173 @@
+<title>Save the Date Nuevos Estilos</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,900;1,9..144,400&family=Mrs+Saint+Delafield&family=Lilita+One&family=Caveat:wght@500;700&family=DM+Sans:ital,wght@0,400;0,500;1,400&display=swap">
+<style>
+  :root{--pg:#EDE8DF;--pg-ink:#24282B;--pg-muted:#6B6A64}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--pg);color:var(--pg-ink);font-family:"DM Sans",system-ui,sans-serif;padding-block:32px 72px;padding-inline:clamp(16px,4vw,48px);line-height:1.5}
+  .wrap{max-width:1400px;margin:0 auto}
+  .head{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:16px;margin-bottom:28px}
+  h1{font-family:"Fraunces",serif;font-weight:900;font-size:clamp(26px,3.5vw,36px);letter-spacing:-.01em}
+  .lede{max-width:66ch;color:var(--pg-muted);font-size:14px;margin-top:4px}
+  .lang{display:flex;border:1.5px solid var(--pg-ink);border-radius:999px;overflow:hidden;font-size:12px;letter-spacing:.08em}
+  .lang button{appearance:none;border:0;background:transparent;color:var(--pg-ink);font:inherit;font-weight:500;padding:7px 14px;cursor:pointer}
+  .lang button[aria-pressed="true"]{background:var(--pg-ink);color:var(--pg)}
+  .lang button:focus-visible{outline:2px solid #A82F4E;outline-offset:-2px}
+  [data-lang]{display:none}
+  body.es [data-lang="es"],body.en [data-lang="en"]{display:block}
+  span[data-lang]{display:none}
+  body.es span[data-lang="es"],body.en span[data-lang="en"]{display:inline}
+
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:40px 28px}
+  .slot{display:flex;flex-direction:column;align-items:center;gap:12px}
+  .label{width:100%;max-width:430px}
+  .label .eyebrow{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--pg-muted);font-weight:500;display:block}
+  .label h2{font-family:"Fraunces",serif;font-weight:900;font-size:20px}
+  .read{width:100%;max-width:430px;font-size:13px;color:var(--pg-muted)}
+  .read b{color:var(--pg-ink);font-weight:500}
+  .card{width:100%;max-width:430px;aspect-ratio:9/15;max-height:none;border-radius:4px;position:relative;overflow:hidden;box-shadow:0 20px 50px -18px rgba(36,40,43,.45)}
+
+  /* ======== 1 · Retro bold (pistacho + granate + script crema) ======== */
+  .c1{background:#C9C46A;color:#A82F4E;padding:clamp(24px,7vw,40px) clamp(22px,6vw,34px);display:flex;flex-direction:column}
+  .c1 .big{font-family:"Fraunces",serif;font-weight:900;font-size:clamp(40px,11vw,54px);line-height:.92;letter-spacing:-.01em;text-transform:uppercase;margin-top:18px;position:relative}
+  .c1 .script{font-family:"Mrs Saint Delafield",cursive;font-size:clamp(40px,10.5vw,54px);line-height:.9;color:#FFF6E6;margin:-12px 0 0 22px;white-space:nowrap}
+  .c1 .script i{font-style:normal;color:#FFF6E6}
+  .c1 .tag{font-size:13px;margin-top:26px;color:#5E5A22}
+  .c1 .date{font-family:"Fraunces",serif;font-weight:900;font-size:clamp(24px,6.5vw,30px);margin-top:auto;letter-spacing:.01em;line-height:1.05}
+  .c1 .date small{display:block;font-family:"DM Sans",sans-serif;font-weight:400;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:#5E5A22;margin-top:6px}
+  .c1 .where{font-size:13px;margin-top:14px;line-height:1.45;color:#5E5A22}
+  .c1 .where b{font-weight:500;color:#A82F4E;text-transform:uppercase;letter-spacing:.1em;font-size:12px;display:block}
+  .c1 .foot{font-family:"Mrs Saint Delafield",cursive;font-size:26px;margin-top:18px;line-height:1;text-align:right;color:#A82F4E}
+  .c1 .sp{position:absolute;color:#FFF6E6;font-size:22px;line-height:1}
+  .c1 .sp.g{color:#A82F4E}
+
+  /* ======== 2 · Letras huecas dibujadas a mano (crema + verde viña + granate) ======== */
+  .c2{background:#F4EBD9;color:#6F8F2E;padding:clamp(24px,7vw,40px) clamp(22px,6vw,34px);display:flex;flex-direction:column;text-align:left}
+  .c2 .hollow{font-family:"Lilita One",sans-serif;font-size:clamp(48px,13vw,66px);line-height:.98;text-transform:uppercase;color:transparent;-webkit-text-stroke:2.2px #6F8F2E;letter-spacing:.01em;margin-top:6px}
+  .c2 .hollow.fill{color:#6F8F2E;-webkit-text-stroke:0}
+  .c2 .names{font-family:"Caveat",cursive;font-weight:700;font-size:clamp(32px,8.5vw,42px);line-height:1;color:#A82F4E;margin-top:22px}
+  .c2 .date{font-family:"Lilita One",sans-serif;font-size:clamp(20px,5.5vw,26px);color:#6F8F2E;margin-top:8px;letter-spacing:.04em}
+  .c2 .where{font-size:12.5px;color:#5E5A22;margin-top:10px;line-height:1.45}
+  .c2 .where b{font-weight:500;color:#A82F4E;text-transform:uppercase;letter-spacing:.1em;font-size:11.5px;display:block}
+  .c2 svg{position:absolute;right:6%;bottom:5%;width:52%;height:auto}
+  .c2 .txt{position:relative;z-index:1}
+
+  /* ======== 3 · Monolínea (todo granate sobre crema, caligrafía) ======== */
+  .c3{background:#F7EEDC;color:#A82F4E;padding:clamp(22px,6vw,36px) clamp(20px,6vw,32px)}
+  .c3 .hand{font-family:"Caveat",cursive;font-weight:500;font-size:clamp(34px,9.5vw,46px);line-height:1;text-align:center;transform:rotate(-3deg);margin-top:8px}
+  .c3 .hand b{font-weight:700;display:block;font-size:1.12em}
+  .c3 svg.scene{display:block;width:100%;height:auto;margin-top:6px}
+  .c3 .meta{position:absolute;right:9%;bottom:9%;text-align:right;font-family:"Caveat",cursive;font-weight:700;font-size:clamp(20px,5.6vw,26px);line-height:1.15;transform:rotate(-2deg)}
+  .c3 .meta small{display:block;font-weight:500;font-size:.72em}
+</style>
+
+<div class="wrap">
+  <div class="head">
+    <div>
+      <h1>Save the Date · tres estilos nuevos</h1>
+      <p class="lede">Emulan las tres referencias de <code>new_candidates/</code> — el retro tipográfico, las letras huecas dibujadas a mano y la ilustración monolínea — con nuestro contenido, nuestros colores (granate #A82F4E, oliva/viña, crema) y dibujos propios. Ninguna copia la plantilla.</p>
+    </div>
+    <div class="lang" role="group" aria-label="Idioma / Language"><button id="btn-es" aria-pressed="true">ES</button><button id="btn-en" aria-pressed="false">EN</button></div>
+  </div>
+
+  <div class="grid">
+
+    <!-- ===== 1 ===== -->
+    <section class="slot">
+      <div class="label"><span class="eyebrow">Estilo 1 · ref. «Bold Retro»</span><h2>Retro tipográfico</h2></div>
+      <div class="card c1">
+        <span class="sp" style="top:9%;right:14%">✦</span><span class="sp g" style="top:13%;right:9%;font-size:16px">✦</span>
+        <span class="sp g" style="bottom:22%;left:8%;font-size:18px">✦</span><span class="sp" style="bottom:19%;left:14%;font-size:12px">✦</span>
+        <p class="big"><span data-lang="es">Nos<br>casamos<br>¡por fin!</span><span data-lang="en">We're<br>getting<br>married!</span></p>
+        <p class="script">Sara <i>&amp;</i> Emmanuel</p>
+        <p class="tag"><span data-lang="es">Guarda la fecha. La invitación formal llegará más adelante.</span><span data-lang="en">Save the date. The formal invitation will follow.</span></p>
+        <p class="date"><span data-lang="es">5 de junio<br>de 2027</span><span data-lang="en">June 5th,<br>2027</span><small><span data-lang="es">Sábado · hora por confirmar</span><span data-lang="en">Saturday · time to be confirmed</span></small></p>
+        <p class="where"><b>Vilasira</b>Venta del Moro · Valencia · <span data-lang="es">España</span><span data-lang="en">Spain</span></p>
+        <p class="foot">jejjohnson.github.io/boda-2027</p>
+      </div>
+      <p class="read"><b>Qué toma:</b> serif gordo + script fina cruzando el titular, estrellitas, una sola tinta sobre color plano. <b>Cambio:</b> pistacho en vez de lima, granate en vez de naranja. Es el más «cartel».</p>
+    </section>
+
+    <!-- ===== 2 ===== -->
+    <section class="slot">
+      <div class="label"><span class="eyebrow">Estilo 2 · ref. «Hand-drawn Suite»</span><h2>Letras huecas</h2></div>
+      <div class="card c2">
+        <div class="txt">
+          <p class="hollow"><span data-lang="es">Nos<br>casa-<br>mos</span><span data-lang="en">We're<br>getting<br>married</span></p>
+          <p class="names">Sara &amp;<br>Emmanuel</p>
+          <p class="date">05.06.2027</p>
+          <p class="where"><b>Vilasira</b>Venta del Moro<br>Valencia · <span data-lang="es">España</span><span data-lang="en">Spain</span><br><span data-lang="es">Hora por confirmar</span><span data-lang="en">Time to be confirmed</span></p>
+        </div>
+        <!-- torre de copas + botella que sirve, línea verde -->
+        <svg viewBox="0 0 220 230" fill="none" stroke="#6F8F2E" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <g id="cup"><path d="M0 0h22c0 9-4.5 14-11 15.5C4.5 14 0 9 0 0z"/><path d="M11 15.5V24M4 24h14"/></g>
+          <use href="#cup" x="99" y="70"/>
+          <use href="#cup" x="85" y="106"/><use href="#cup" x="113" y="106"/>
+          <use href="#cup" x="71" y="142"/><use href="#cup" x="99" y="142"/><use href="#cup" x="127" y="142"/>
+          <use href="#cup" x="57" y="178"/><use href="#cup" x="85" y="178"/><use href="#cup" x="113" y="178"/><use href="#cup" x="141" y="178"/>
+          <path d="M40 206h140" stroke-width="2.6"/>
+          <!-- botella inclinada sirviendo -->
+          <g transform="translate(150,10) rotate(35)">
+            <path d="M7 0h8v4H7z"/><path d="M8 5h6v9c0 3 6 5 6 11v24c0 2-1.5 3.5-3.5 3.5h-11C3.5 52.5 2 51 2 49V25c0-6 6-8 6-11V5z"/>
+          </g>
+          <path d="M132 47c-2 6-5 12-12 18" stroke-dasharray="1 4" stroke-width="2.6"/>
+          <!-- chispas -->
+          <path d="M60 60l-3-6M52 72l-6-2M70 52l1-7" stroke="#A82F4E"/>
+          <path d="M150 60l3-6M162 72l6-2M140 52l-1-7" stroke="#A82F4E"/>
+          <!-- uvas pequeñas en la base -->
+          <g stroke="#A82F4E" stroke-width="1.8"><circle cx="24" cy="196" r="4"/><circle cx="32" cy="196" r="4"/><circle cx="28" cy="203" r="4"/><circle cx="20" cy="203" r="4"/><circle cx="36" cy="203" r="4"/><circle cx="24" cy="210" r="4"/><circle cx="32" cy="210" r="4"/></g>
+          <path d="M26 190c3-4 8-5 12-2" />
+        </svg>
+      </div>
+      <p class="read"><b>Qué toma:</b> titular hueco en letra gorda «a mano», caligrafía para los nombres, un dibujo grande en línea del mismo color. <b>Cambio:</b> verde viña en vez de verde manzana, granate para nombres y uvas. Es el más divertido.</p>
+    </section>
+
+    <!-- ===== 3 ===== -->
+    <section class="slot">
+      <div class="label"><span class="eyebrow">Estilo 3 · ref. «Party On!»</span><h2>Monolínea</h2></div>
+      <div class="card c3">
+        <p class="hand"><span data-lang="es">Save the date<br><b>Sara y Emmanuel</b></span><span data-lang="en">Save the date<br><b>Sara and Emmanuel</b></span></p>
+        <svg class="scene" viewBox="0 0 400 470" fill="none" stroke="#A82F4E" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <!-- guirnalda de luces 1 -->
+          <path d="M8 150C110 116 250 116 392 146"/>
+          <g id="bulb"><path d="M0 0v7"/><path d="M0 7c-4 0-5 5-3 8s5 3 6 0 1-8-3-8z"/></g>
+          <use href="#bulb" x="52" y="134"/><use href="#bulb" x="104" y="125"/><use href="#bulb" x="156" y="120"/><use href="#bulb" x="208" y="119"/><use href="#bulb" x="260" y="121"/><use href="#bulb" x="312" y="127"/><use href="#bulb" x="360" y="137"/>
+          <!-- guirnalda 2 -->
+          <path d="M226 210C290 250 350 240 396 200"/>
+          <use href="#bulb" x="262" y="230"/><use href="#bulb" x="300" y="240"/><use href="#bulb" x="340" y="235"/><use href="#bulb" x="376" y="218"/>
+          <!-- farolillo de papel -->
+          <path d="M70 10v18"/><ellipse cx="70" cy="62" rx="34" ry="32"/><path d="M70 30v64M44 44c8-4 44-4 52 0M44 80c8 4 44 4 52 0M38 62h64"/><path d="M55 33c-7 10-7 48 0 58M85 33c7 10 7 48 0 58"/>
+          <!-- tarta 3 pisos -->
+          <g transform="translate(120,190)">
+            <path d="M52 0h56v34H52z"/><path d="M52 8c6 0 6 8 12 8s6-8 12-8 6 8 12 8 6-8 12-8 6 8 8 8"/>
+            <path d="M34 34h92v44H34z"/><path d="M34 44c6 0 6 8 12 8s6-8 12-8 6 8 12 8 6-8 12-8 6 8 12 8 6-8 12-8 6 8 12 8 6-8 12-8"/>
+            <path d="M14 78h132v46H14z"/><path d="M14 88c6 0 6 8 12 8s6-8 12-8 6 8 12 8 6-8 12-8 6 8 12 8 6-8 12-8 6 8 12 8 6-8 12-8 6 8 12 8 6-8 12-8 6 8 8 8"/>
+            <path d="M0 124h160M80 124v24M56 150c8-3 40-3 48 0"/>
+            <circle cx="72" cy="-6" r="4"/><circle cx="88" cy="-6" r="4"/><path d="M80 -14c-3-4-9-1-6 3l6 6 6-6c3-4-3-7-6-3z"/>
+          </g>
+          <!-- copas -->
+          <g id="copa"><path d="M0 0h24c0 10-5 16-12 17.5C5 16 0 10 0 0z"/><path d="M12 17.5V30M4 30h16"/><path d="M4 8c4 3 12 3 16 0"/></g>
+          <use href="#copa" x="40" y="250"/><use href="#copa" x="60" y="330"/><use href="#copa" x="92" y="318"/>
+          <!-- botella -->
+          <g transform="translate(20,340)"><path d="M13 0h12v4H13z"/><path d="M14 6h10v14c0 5 8 8 8 17v35c0 3-2 5-5 5H11c-3 0-5-2-5-5V37c0-9 8-12 8-17V6z"/><path d="M8 50h22M8 62h22"/></g>
+          <!-- uvas -->
+          <g transform="translate(300,270)"><path d="M14 6c4-5 11-6 15-2M18 12c3-4 9-5 13-2"/><circle cx="14" cy="18" r="6"/><circle cx="26" cy="18" r="6"/><circle cx="8" cy="28" r="6"/><circle cx="20" cy="28" r="6"/><circle cx="32" cy="28" r="6"/><circle cx="14" cy="38" r="6"/><circle cx="26" cy="38" r="6"/><circle cx="20" cy="48" r="6"/></g>
+          <!-- flores en jarrón -->
+          <g transform="translate(150,350)"><path d="M10 40c-4 20 0 40 8 44h20c8-4 12-24 8-44z"/><path d="M24 40V10M18 40c-2-12-10-18-14-22M32 40c2-12 10-18 14-22"/>
+            <g id="fl"><circle cx="0" cy="0" r="3"/><path d="M0-9v3M0 6v3M-9 0h3M6 0h3M-6-6l2 2M4 4l2 2M6-6l-2 2M-4 4l-2 2"/></g>
+            <use href="#fl" x="24" y="8"/><use href="#fl" x="4" y="16"/><use href="#fl" x="46" y="16"/></g>
+          <!-- borde de mesa -->
+          <path d="M0 440L140 400M210 440l-40-48"/>
+        </svg>
+        <p class="meta">05.06.2027<small>Vilasira · Venta del Moro<br>Valencia</small></p>
+      </div>
+      <p class="read"><b>Qué toma:</b> una sola tinta, todo dibujado a mano alzada (guirnaldas, farolillo, tarta, vino, flores) y el texto en caligrafía. <b>Cambio:</b> granate en vez de rojo coral, uvas en vez de bola de discoteca. Es el más «fiesta en la finca».</p>
+    </section>
+
+  </div>
+</div>
+
+<script>
+  const b = document.body, es = document.getElementById('btn-es'), en = document.getElementById('btn-en');
+  function set(l){ b.className = l; es.setAttribute('aria-pressed', l === 'es'); en.setAttribute('aria-pressed', l === 'en'); }
+  set('es'); es.onclick = () => set('es'); en.onclick = () => set('en');
+</script>
