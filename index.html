@@ -3,50 +3,510 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Sara &amp; Emmanuel · 5 junio 2027</title>
-<meta name="robots" content="noindex">
+<title>Sara &amp; Emmanuel · 5 junio 2027 · Cómo llegar</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500&family=Fraunces:ital,opsz,wght@0,9..144,300;1,9..144,300&family=Karla:wght@300;400&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;1,9..144,300&family=Karla:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
-  :root{--burgundy:#6E1423;--cream:#FBF3EA;--blush:#E4B7A0;--sage:#7D8B6A;--muted:#8A7570}
+  :root{
+    --burgundy:#6E1423;
+    --burgundy-lt:#8F2233;
+    --cream:#FBF3EA;
+    --cream-2:#F4E8DA;
+    --blush:#E4B7A0;
+    --sage:#7D8B6A;
+    --ink:#3B2A2C;
+    --muted:#8A7570;
+    --radius:14px;
+    --maxw:960px;
+  }
   *{box-sizing:border-box;margin:0;padding:0}
+  html{-webkit-text-size-adjust:100%;scroll-behavior:smooth;scroll-padding-top:72px}
   body{
-    min-height:100dvh;display:flex;align-items:center;justify-content:center;
-    padding:24px 16px;text-align:center;color:var(--burgundy);
-    font-family:"Karla",system-ui,-apple-system,sans-serif;font-weight:300;line-height:1.6;
-    background:radial-gradient(ellipse at 50% 0%, rgba(228,183,160,.35), transparent 62%),var(--cream);
+    background:var(--cream);color:var(--ink);
+    font-family:"Karla",system-ui,-apple-system,"Segoe UI",sans-serif;font-weight:300;
+    line-height:1.65;font-size:16px;-webkit-font-smoothing:antialiased;
   }
-  main{max-width:560px}
-  .kicker{font-size:11.5px;letter-spacing:.42em;text-transform:uppercase;color:var(--sage)}
-  h1{font-family:"Fraunces",Georgia,serif;font-weight:300;font-size:clamp(42px,12vw,72px);line-height:1.02;margin:12px 0}
-  h1 .amp{display:block;font-family:"Caveat",cursive;font-size:.55em;color:var(--blush)}
-  .when{font-family:"Fraunces",serif;font-size:clamp(17px,4.6vw,22px);letter-spacing:.14em}
-  .where{font-size:13px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);margin-top:6px}
-  .soon{
-    margin:clamp(28px,7vw,40px) auto 0;padding-top:clamp(22px,5vw,28px);
-    border-top:1px solid rgba(110,20,35,.25);width:min(320px,100%);
+  img,svg{max-width:100%}
+  a{color:var(--burgundy)}
+
+  /* ===== i18n ===== */
+  [data-lang]{display:none}
+  body.es [data-lang="es"],body.en [data-lang="en"]{display:block}
+  span[data-lang],em[data-lang],strong[data-lang],td[data-lang],th[data-lang],select[data-lang]{display:none}
+  body.es span[data-lang="es"],body.en span[data-lang="en"],
+  body.es em[data-lang="es"],body.en em[data-lang="en"],
+  body.es strong[data-lang="es"],body.en strong[data-lang="en"]{display:inline}
+  body.es td[data-lang="es"],body.en td[data-lang="en"],
+  body.es th[data-lang="es"],body.en th[data-lang="en"]{display:table-cell}
+  body.es select[data-lang="es"],body.en select[data-lang="en"]{display:block}
+
+  /* ===== nav ===== */
+  header.nav{
+    position:sticky;top:0;z-index:50;
+    background:rgba(251,243,234,.93);backdrop-filter:blur(10px);
+    border-bottom:1px solid rgba(110,20,35,.16);
   }
-  .soon p{font-family:"Caveat",cursive;font-size:clamp(24px,6.5vw,30px);color:var(--sage);line-height:1.25}
-  .soon small{display:block;margin-top:10px;font-size:13.5px;color:var(--muted)}
-  svg{display:block;width:min(220px,60%);margin:clamp(18px,5vw,26px) auto 0}
+  .nav-inner{
+    max-width:var(--maxw);margin:0 auto;padding:9px clamp(12px,4vw,24px);
+    display:flex;align-items:center;gap:12px;
+  }
+  .brand{
+    font-family:"Caveat",cursive;font-size:22px;color:var(--burgundy);
+    white-space:nowrap;text-decoration:none;flex:0 0 auto;
+  }
+  .links{
+    flex:1;display:flex;gap:clamp(10px,2.2vw,22px);overflow-x:auto;
+    scrollbar-width:none;-ms-overflow-style:none;
+  }
+  .links::-webkit-scrollbar{display:none}
+  .links a{
+    white-space:nowrap;text-decoration:none;color:var(--ink);
+    font-size:12.5px;letter-spacing:.1em;text-transform:uppercase;padding:6px 0;
+    border-bottom:1.5px solid transparent;
+  }
+  .links a:hover{border-color:var(--burgundy);color:var(--burgundy)}
+  .lang{display:flex;flex:0 0 auto;border:1px solid var(--burgundy);border-radius:999px;overflow:hidden}
+  .lang button{
+    appearance:none;border:0;background:transparent;color:var(--burgundy);
+    font:inherit;font-size:11px;letter-spacing:.12em;padding:6px 10px;cursor:pointer;
+  }
+  .lang button[aria-pressed="true"]{background:var(--burgundy);color:var(--cream)}
+
+  /* ===== layout ===== */
+  section{padding:clamp(48px,9vw,84px) clamp(16px,5vw,24px);position:relative}
+  .wrap{max-width:var(--maxw);margin:0 auto}
+  .narrow{max-width:660px;margin:0 auto}
+  h2{
+    font-family:"Fraunces",Georgia,serif;font-weight:300;
+    font-size:clamp(28px,7vw,42px);color:var(--burgundy);line-height:1.15;
+    text-align:center;margin-bottom:6px;
+  }
+  .sub-h{
+    text-align:center;font-family:"Caveat",cursive;font-size:clamp(19px,4.6vw,23px);
+    color:var(--sage);margin-bottom:clamp(24px,5vw,36px);
+  }
+  .alt{background:var(--cream-2)}
+  .stamp{
+    display:block;text-align:center;font-size:11px;font-style:italic;color:var(--muted);
+    margin-top:26px;
+  }
+  .tbc{
+    display:inline-block;background:rgba(228,183,160,.35);color:#8A4B31;
+    border-radius:999px;font-size:11px;letter-spacing:.06em;padding:2px 10px;
+    white-space:nowrap;
+  }
+  .placeholder{
+    background:rgba(228,183,160,.4);border-bottom:1.5px dotted var(--blush);
+    padding:0 .14em;border-radius:3px;
+  }
+
+  /* ===== hero ===== */
+  .hero{
+    text-align:center;padding-top:clamp(30px,7vw,54px);
+    background:
+      radial-gradient(ellipse at 50% 0%, rgba(228,183,160,.35), transparent 62%),
+      var(--cream);
+    overflow:hidden;
+  }
+  .hero .arch{width:min(300px,72%);margin:0 auto clamp(16px,3.5vw,26px);display:block}
+  .hero .kicker{
+    font-size:11.5px;letter-spacing:.42em;text-transform:uppercase;color:var(--sage);
+  }
+  .hero h1{
+    font-family:"Fraunces",Georgia,serif;font-weight:300;
+    font-size:clamp(42px,12vw,78px);line-height:1.02;color:var(--burgundy);margin:10px 0;
+  }
+  .hero h1 .amp{display:block;font-family:"Caveat",cursive;font-size:.55em;color:var(--blush);margin:0}
+  .hero .when{
+    font-family:"Fraunces",serif;font-size:clamp(17px,4.6vw,22px);letter-spacing:.14em;
+    margin-top:8px;
+  }
+  .hero .where{font-size:13.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);margin-top:6px}
+
+  /* countdown */
+  .count{display:flex;justify-content:center;gap:clamp(8px,3vw,22px);margin:clamp(26px,6vw,36px) 0 6px;flex-wrap:wrap}
+  .count div{
+    min-width:clamp(58px,17vw,84px);background:var(--cream-2);border:1px solid rgba(110,20,35,.18);
+    border-radius:var(--radius);padding:12px 6px;
+  }
+  .count b{
+    display:block;font-family:"Fraunces",serif;font-weight:400;
+    font-size:clamp(24px,6.5vw,34px);color:var(--burgundy);line-height:1;
+  }
+  .count span{font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted)}
+
+  .btn{
+    display:inline-block;background:var(--burgundy);color:var(--cream);text-decoration:none;
+    font-size:12.5px;letter-spacing:.22em;text-transform:uppercase;font-weight:500;
+    padding:15px 32px;border-radius:999px;border:0;cursor:pointer;font-family:inherit;
+    transition:background .18s ease,transform .12s ease;
+  }
+  .btn:hover{background:var(--burgundy-lt)}
+  .btn:active{transform:translateY(2px)}
+  .btn.ghost{background:transparent;color:var(--burgundy);border:1.5px solid var(--burgundy)}
+  .btn.ghost:hover{background:var(--burgundy);color:var(--cream)}
+  .btn-row{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:clamp(22px,5vw,30px)}
+
+  /* divider dibujado */
+  .divider{display:block;width:min(260px,60%);margin:clamp(30px,6vw,44px) auto 0}
+
+  /* ===== cards / grid ===== */
+  .grid{display:grid;gap:clamp(14px,3vw,20px)}
+  @media(min-width:680px){ .grid.g2{grid-template-columns:1fr 1fr} .grid.g3{grid-template-columns:repeat(3,1fr)} }
+  .card{
+    background:var(--cream);border:1px solid rgba(110,20,35,.16);border-radius:var(--radius);
+    padding:clamp(18px,4.5vw,26px);
+  }
+  .alt .card{background:var(--cream)}
+  .card h3{
+    font-family:"Fraunces",serif;font-weight:400;font-size:clamp(18px,4.6vw,21px);
+    color:var(--burgundy);margin-bottom:6px;display:flex;align-items:center;gap:9px;
+  }
+  .card h3 svg{flex:0 0 auto}
+  .card p{font-size:14.5px}
+  .card .price{display:block;margin-top:8px;font-size:12.5px;color:var(--sage);letter-spacing:.04em}
+
+  /* ===== timeline ===== */
+  .timeline{max-width:520px;margin:0 auto;position:relative;padding-left:34px}
+  .timeline::before{
+    content:"";position:absolute;left:9px;top:8px;bottom:8px;width:2px;
+    background:repeating-linear-gradient(180deg,var(--blush) 0 7px,transparent 7px 14px);
+  }
+  .tl{position:relative;padding:0 0 clamp(22px,5vw,30px)}
+  .tl:last-child{padding-bottom:0}
+  .tl::before{
+    content:"";position:absolute;left:-30px;top:6px;width:14px;height:14px;border-radius:50%;
+    background:var(--cream);border:2px solid var(--burgundy);
+  }
+  .alt .tl::before{background:var(--cream-2)}
+  .tl h4{font-family:"Fraunces",serif;font-weight:400;font-size:clamp(17px,4.4vw,20px);color:var(--burgundy)}
+  .tl p{font-size:14px;color:var(--muted)}
+
+  /* ===== tabla viaje ===== */
+  .table-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;border-radius:var(--radius);
+    border:1px solid rgba(110,20,35,.16)}
+  table{border-collapse:collapse;width:100%;min-width:520px;font-size:14px;background:var(--cream)}
+  th,td{padding:11px 14px;text-align:left;border-bottom:1px solid rgba(110,20,35,.12)}
+  th{background:rgba(110,20,35,.06);font-weight:500;font-size:12px;letter-spacing:.1em;
+    text-transform:uppercase;color:var(--burgundy)}
+  tr:last-child td{border-bottom:0}
+  .hint{font-size:12.5px;color:var(--muted);font-style:italic;margin-top:10px;text-align:center}
+
+  /* enlaces externos */
+  .card a,td a,.ans a,footer .lnk{
+    color:var(--burgundy);text-decoration:none;
+    border-bottom:1px solid rgba(110,20,35,.45);
+  }
+  .card a:hover,td a:hover,.ans a:hover{border-bottom-color:var(--burgundy);background:rgba(228,183,160,.25)}
+  .card a[target]::after,td a[target]::after,.ans a[target]::after{
+    content:"↗";font-size:.72em;vertical-align:super;margin-left:2px;opacity:.6;
+  }
+  footer .lnk{color:var(--blush);border-bottom-color:rgba(228,183,160,.5)}
+
+  /* ===== FAQ ===== */
+  details{
+    border-bottom:1px solid rgba(110,20,35,.16);padding:14px 0;
+  }
+  details summary{
+    cursor:pointer;list-style:none;font-family:"Fraunces",serif;font-size:clamp(16px,4.2vw,18px);
+    color:var(--burgundy);display:flex;justify-content:space-between;gap:12px;align-items:center;
+  }
+  details summary::-webkit-details-marker{display:none}
+  details summary::after{content:"+";font-size:20px;color:var(--blush);flex:0 0 auto}
+  details[open] summary::after{content:"–"}
+  details .ans{padding-top:10px;font-size:14.5px;color:var(--ink)}
+
+  /* ===== RSVP form ===== */
+  form{max-width:560px;margin:0 auto;display:grid;gap:16px}
+  label{display:block;font-size:12.5px;letter-spacing:.1em;text-transform:uppercase;
+    color:var(--burgundy);margin-bottom:6px;font-weight:500}
+  input,select,textarea{
+    width:100%;font:inherit;font-size:15px;padding:12px 14px;border-radius:10px;
+    border:1px solid rgba(110,20,35,.28);background:var(--cream);color:var(--ink);
+  }
+  .alt input,.alt select,.alt textarea{background:var(--cream)}
+  input:focus,select:focus,textarea:focus{outline:2px solid var(--blush);outline-offset:1px}
+  fieldset{border:0}
+  .radios{display:flex;gap:10px;flex-wrap:wrap}
+  .radios label{
+    flex:1 1 150px;display:flex;align-items:center;gap:9px;margin:0;
+    border:1px solid rgba(110,20,35,.28);border-radius:10px;padding:12px 14px;
+    text-transform:none;letter-spacing:0;font-size:14.5px;color:var(--ink);font-weight:400;cursor:pointer;
+  }
+  .radios input{width:auto;padding:0}
+  .form-note{font-size:12.5px;color:var(--muted);font-style:italic;text-align:center}
+
+  /* ===== footer ===== */
+  footer{
+    background:var(--burgundy);color:var(--cream);text-align:center;
+    padding:clamp(40px,8vw,60px) 20px;
+  }
+  footer .names{font-family:"Caveat",cursive;font-size:clamp(30px,8vw,42px)}
+  footer p{font-size:13.5px;opacity:.85;margin-top:8px}
+  footer a{color:var(--blush)}
+  footer .sep{width:70px;height:1px;background:rgba(251,243,234,.4);margin:18px auto}
 </style>
 </head>
-<body>
-<main>
-  <p class="kicker">Nos casamos<br>We're getting married</p>
-  <h1>Sara<span class="amp">&amp;</span>Emmanuel</h1>
-  <p class="when">5 · 06 · 2027</p>
-  <p class="where">Vilasira · Venta del Moro · Valencia</p>
+<body class="es">
 
-  <div class="soon">
-    <p>Web en construcción<br>Website coming soon</p>
-    <small>Guarda la fecha — pronto toda la información aquí.<br>Save the date — all the details will live here soon.</small>
+<header class="nav">
+  <div class="nav-inner">
+    <a class="brand" href="#top">S &amp; E · 5·VI·27</a>
+    <nav class="links">
+      <a href="#llegar"><span data-lang="es">Cómo llegar</span><span data-lang="en">Travel</span></a>
+      <a href="#dormir"><span data-lang="es">Dónde dormir</span><span data-lang="en">Stay</span></a>
+      <a href="#pronto"><span data-lang="es">Próximamente</span><span data-lang="en">Coming soon</span></a>
+    </nav>
+    <div class="lang" role="group" aria-label="Idioma / Language">
+      <button id="btn-es" aria-pressed="true">ES</button>
+      <button id="btn-en" aria-pressed="false">EN</button>
+    </div>
   </div>
+</header>
 
-  <svg viewBox="0 0 260 22" fill="none" stroke="#E4B7A0" stroke-width="1.6" stroke-linecap="round" aria-hidden="true">
-    <path d="M4 12q30-12 58 0t58 0 58 0 58 0"/><circle cx="130" cy="4" r="3" stroke="#7D8B6A"/>
-  </svg>
-</main>
+<!-- ============ HERO ============ -->
+<section class="hero" id="top">
+  <div class="wrap">
+    <!-- arco botánico dibujado a mano -->
+    <svg class="arch" viewBox="0 0 340 150" fill="none" stroke="#6E1423" stroke-width="1.8"
+         stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <path d="M28 148C24 92 62 40 170 38s146 54 142 110" stroke-dasharray="0" opacity=".55"/>
+      <g stroke="#7D8B6A">
+        <path d="M60 108c14-10 18-26 14-40M74 68c8 2 14 8 16 16M74 82c9 0 16 4 20 11M70 96c9-1 17 2 22 8"/>
+        <path d="M62 66c-8-1-14 3-17 10M60 82c-9 0-15 4-18 11"/>
+      </g>
+      <g stroke="#7D8B6A">
+        <path d="M280 108c-14-10-18-26-14-40M266 68c-8 2-14 8-16 16M266 82c-9 0-16 4-20 11M270 96c-9-1-17 2-22 8"/>
+        <path d="M278 66c8-1 14 3 17 10M280 82c9 0 15 4 18 11"/>
+      </g>
+      <g stroke="#E4B7A0" stroke-width="2">
+        <circle cx="150" cy="34" r="7"/><circle cx="170" cy="28" r="9"/><circle cx="192" cy="34" r="7"/>
+        <path d="M150 34l-3-8M170 28l0-10M192 34l3-8"/>
+      </g>
+      <g stroke="#7D8B6A">
+        <path d="M118 40c8-6 18-8 26-4M222 40c-8-6-18-8-26-4"/>
+      </g>
+    </svg>
+
+    <p class="kicker"><span data-lang="es">Nos casamos</span><span data-lang="en">We're getting married</span></p>
+    <h1>
+      Sara
+      <span class="amp">&amp;</span>
+      Emmanuel
+    </h1>
+    <p class="when">5 · 06 · 2027</p>
+    <p class="where"><a href="https://vilasira.com/" target="_blank" rel="noopener" style="color:inherit;border-bottom:1px solid rgba(138,117,112,.5);text-decoration:none">Vilasira</a> · Venta del Moro · Valencia</p>
+
+    <div class="count" id="count">
+      <div><b id="cd-d">—</b><span data-lang="es">días</span><span data-lang="en">days</span></div>
+      <div><b id="cd-h">—</b><span data-lang="es">horas</span><span data-lang="en">hours</span></div>
+      <div><b id="cd-m">—</b><span data-lang="es">min</span><span data-lang="en">min</span></div>
+      <div><b id="cd-s">—</b><span data-lang="es">seg</span><span data-lang="en">sec</span></div>
+    </div>
+
+    <div class="btn-row">
+      <a class="btn" href="#llegar"><span data-lang="es">Cómo llegar</span><span data-lang="en">How to get there</span></a>
+      <a class="btn ghost" href="#dormir"><span data-lang="es">Dónde dormir</span><span data-lang="en">Where to stay</span></a>
+    </div>
+
+    <svg class="divider" viewBox="0 0 260 22" fill="none" stroke="#E4B7A0" stroke-width="1.6"
+         stroke-linecap="round" aria-hidden="true">
+      <path d="M4 12q30-12 58 0t58 0 58 0 58 0"/>
+      <circle cx="130" cy="4" r="3" stroke="#7D8B6A"/>
+    </svg>
+  </div>
+</section>
+
+
+<!-- ============ CÓMO LLEGAR ============ -->
+<section id="llegar">
+  <div class="wrap">
+    <h2><span data-lang="es">Cómo llegar</span><span data-lang="en">Getting there</span></h2>
+    <p class="sub-h"><span data-lang="es">La finca está en Venta del Moro, a ~91 km de Valencia</span><span data-lang="en">The venue is in Venta del Moro, ~91 km / 57 mi from Valencia</span></p>
+
+    <div class="grid g2" style="margin-bottom:clamp(20px,4vw,28px)">
+      <div class="card">
+        <h3><span data-lang="es">Desde EE. UU.</span><span data-lang="en">From the US</span></h3>
+        <p><span data-lang="es">No hay vuelos directos a Valencia. Lo más cómodo: volar a <strong>Madrid</strong> y coger el tren de alta velocidad hasta <strong>Requena-Utiel</strong> (~1 h 30 los directos; Renfe, Avlo, Iryo y Ouigo, ~13 trenes al día; desde ~15 € con antelación, normalmente 25–45 €). Alternativa: volar a <strong>Valencia</strong> con una escala — <strong>junio es temporada alta</strong>: cuenta con ~900–1.200 $ ida y vuelta desde Nueva York, o ~600–700 $ reservando con meses de antelación.</span>
+           <span data-lang="en">There are no direct flights to Valencia. Easiest: fly to <strong>Madrid</strong>, then the high-speed train to <strong>Requena-Utiel</strong> (~1 h 30 min direct; Renfe, Avlo, Iryo and Ouigo, ~13 trains/day; from ~€15 booked ahead, typically €25–45). Alternative: fly to <strong>Valencia</strong> with one connection — <strong>June is peak season</strong>: expect ~$900–1,200 round trip from New York, or ~$600–700 if you book months ahead.</span></p>
+      </div>
+      <div class="card">
+        <h3><span data-lang="es">Desde Europa</span><span data-lang="en">From Europe</span></h3>
+        <p><span data-lang="es">Valencia (VLC) tiene vuelos directos low-cost desde casi toda Europa. Alicante es alternativa (~2 h en coche) y Madrid también funciona gracias al tren.</span>
+           <span data-lang="en">Valencia (VLC) has direct budget flights from most major European cities. Alicante is a backup (~2 h drive), and Madrid works too thanks to the train.</span></p>
+      </div>
+    </div>
+
+    <div class="table-scroll">
+      <table>
+        <thead>
+          <tr>
+            <th data-lang="es">Valencia → Requena (pueblo)</th><th data-lang="en">Valencia → Requena (town)</th>
+            <th data-lang="es">Tiempo</th><th data-lang="en">Time</th>
+            <th data-lang="es">Precio aprox.</th><th data-lang="en">Approx. price</th>
+            <th data-lang="es">Notas</th><th data-lang="en">Notes</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td data-lang="es">🚄 <a href="https://www.renfe.com/es/es" target="_blank" rel="noopener">AVE</a> · Joaquín Sorolla → Requena-Utiel</td><td data-lang="en">🚄 <a href="https://www.renfe.com/es/en" target="_blank" rel="noopener">High-speed train</a> · Joaquín Sorolla → Requena-Utiel</td>
+            <td data-lang="es">~25 min</td><td data-lang="en">~25 min</td>
+            <td data-lang="es">~15–25 €</td><td data-lang="en">~€15–25</td>
+            <td data-lang="es">La estación está fuera del pueblo — 10 min en taxi</td><td data-lang="en">Station is outside town — 10 min taxi</td>
+          </tr>
+          <tr>
+            <td data-lang="es">🚌 <a href="https://www.requena.es/pagina/como-llegar-requena" target="_blank" rel="noopener">Autobús (Transvia)</a></td><td data-lang="en">🚌 <a href="https://www.requena.es/pagina/como-llegar-requena" target="_blank" rel="noopener">Bus (Transvia)</a></td>
+            <td data-lang="es">~1 h</td><td data-lang="en">~1 h</td>
+            <td data-lang="es">~7–8 €</td><td data-lang="en">~€7–8</td>
+            <td data-lang="es">~7 al día</td><td data-lang="en">~7 a day</td>
+          </tr>
+          <tr>
+            <td data-lang="es">🚗 Coche por la A-3</td><td data-lang="en">🚗 Car via the A-3</td>
+            <td data-lang="es">~45 min</td><td data-lang="en">~45 min</td>
+            <td data-lang="es">Alquiler ~40–60 €/día en junio</td><td data-lang="en">Rental ~€40–60/day in June</td>
+            <td data-lang="es">Lo más fácil para la finca · Parking gratuito</td><td data-lang="en">Easiest for the venue · Free parking</td>
+          </tr>
+          <tr>
+            <td data-lang="es">🚕 Taxi / traslado</td><td data-lang="en">🚕 Taxi / transfer</td>
+            <td data-lang="es">~45–50 min</td><td data-lang="en">~45–50 min</td>
+            <td data-lang="es">~85–100 €</td><td data-lang="en">~€85–100</td>
+            <td data-lang="es">Precio cerrado reservando online</td><td data-lang="en">Fixed price if booked online</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="hint"><span data-lang="es">Ojo: la estación de AVE «Requena-Utiel» no está en el centro de Requena.</span>
+       <span data-lang="en">Heads up: the "Requena-Utiel" high-speed station is not in Requena town centre.</span></p>
+
+    <div class="card" style="margin-top:clamp(20px,4vw,28px);border-color:rgba(110,20,35,.32)">
+      <h3>📍 <span data-lang="es">Último tramo: Requena → la finca</span><span data-lang="en">Last leg: Requena → the venue</span></h3>
+      <p><span data-lang="es"><strong>Vilasira no está en Requena</strong>, sino en <strong>Venta del Moro</strong>, en la misma comarca. Cuenta con este tramo final:</span>
+         <span data-lang="en"><strong>Vilasira is not in Requena itself</strong> — it's in <strong>Venta del Moro</strong>, in the same district. Budget for this final leg:</span></p>
+      <p style="margin-top:8px">
+        <span data-lang="es">· Desde <strong>Requena pueblo</strong>: ~25 km, ~25 min en coche<br>
+        · Desde la <strong>estación de AVE Requena-Utiel</strong>: ~20 km, ~23 min<br>
+        · <strong>Directo desde Valencia</strong>: ~91 km, ~1 h 10 por la A-3 + CV-465</span>
+        <span data-lang="en">· From <strong>Requena town</strong>: ~25 km / 16 mi, ~25 min by car<br>
+        · From <strong>Requena-Utiel station</strong>: ~20 km / 12 mi, ~23 min<br>
+        · <strong>Straight from Valencia</strong>: ~91 km / 57 mi, ~1 h 10 via the A-3 + CV-465</span>
+      </p>
+      <span class="price"><a href="https://vilasira.com/" target="_blank" rel="noopener">CV-475 km 2, 46310 Venta del Moro</a> · vilasira.com</span>
+    </div>
+
+    <div class="card" style="margin-top:clamp(20px,4vw,28px)">
+      <h3>🚌 <span data-lang="es">Autobús el día de la boda</span><span data-lang="en">Wedding-day shuttle</span></h3>
+      <p><span data-lang="es">Habrá autobús <strong>desde Requena</strong> hasta la finca, ida y vuelta (paradas y horarios más adelante). Si vienes desde <strong>Valencia u otro sitio</strong>, organiza tu transporte — lo más fácil es en coche (~1 h 10 desde Valencia, parking gratuito). ¡Anímate a compartir coche! Más adelante podrás decirnos en la web si ofreces o necesitas plaza.</span>
+         <span data-lang="en">A shuttle bus will run <strong>from Requena</strong> to the venue and back (stops and times to come). Coming from <strong>Valencia or elsewhere</strong>? Please arrange your own transport — a car is easiest (~1 h 10 from Valencia, free parking). We encourage carpooling: you'll be able to offer or request a seat here later on.</span></p>
+      <span class="price"><span class="tbc"><span data-lang="es">Paradas y horarios por confirmar</span><span data-lang="en">Stops &amp; times TBC</span></span></span>
+    </div>
+    <em class="stamp"><span data-lang="es">Precios orientativos consultados en septiembre de 2026</span><span data-lang="en">Ballpark prices checked September 2026</span></em>
+  </div>
+</section>
+
+<!-- ============ DÓNDE DORMIR ============ -->
+<section class="alt" id="dormir">
+  <div class="wrap">
+    <h2><span data-lang="es">Dónde dormir</span><span data-lang="en">Where to stay</span></h2>
+    <p class="sub-h"><span data-lang="es">En Requena y alrededores</span><span data-lang="en">In and around Requena</span></p>
+
+    <div class="grid g2 narrow" style="max-width:760px">
+      <div class="card">
+        <h3><a href="https://www.hoteldonaanita.com/" target="_blank" rel="noopener">Hotel Doña Anita</a></h3>
+        <p><span data-lang="es">Hotel pequeño en la Plaza de Albornoz, en el casco antiguo (Barrio La Villa).</span>
+           <span data-lang="en">Small hotel on Plaza de Albornoz, in the old town (Barrio La Villa).</span></p>
+        <span class="price"><span data-lang="es">Doble desde ~75 €</span><span data-lang="en">Double from ~€75</span></span>
+      </div>
+      <div class="card">
+        <h3><a href="https://www.booking.com/hotel/es/patilla-ciudad-de-requena.html" target="_blank" rel="noopener">Hotel Patilla</a></h3>
+        <p><span data-lang="es">Hotel Patilla Ciudad de Requena, céntrico y sencillo.</span>
+           <span data-lang="en">Hotel Patilla Ciudad de Requena — central and straightforward.</span></p>
+        <span class="price"><span data-lang="es">Doble desde ~50 €</span><span data-lang="en">Double from ~€50</span></span>
+      </div>
+      <div class="card">
+        <h3><span data-lang="es">Casas rurales</span><span data-lang="en">Country houses</span></h3>
+        <p><span data-lang="es">Por toda la comarca. Buenos buscadores: <a href="https://www.escapadarural.com/casas-rurales/requena" target="_blank" rel="noopener">EscapadaRural</a> y <a href="https://www.booking.com/" target="_blank" rel="noopener">Booking</a>. Ideal para familias o grupos que quieran compartir casa.</span>
+           <span data-lang="en">All around the area. Good places to look: <a href="https://www.escapadarural.com/casas-rurales/requena" target="_blank" rel="noopener">EscapadaRural</a> and <a href="https://www.booking.com/" target="_blank" rel="noopener">Booking</a>. Great for families or groups sharing a house.</span></p>
+      </div>
+      <div class="card">
+        <h3><span data-lang="es">Valencia capital</span><span data-lang="en">Valencia city</span></h3>
+        <p><span data-lang="es">Si quieres hacer también turismo de ciudad. Ojo: desde Valencia a la finca hay ~1 h 10 en coche. Guía oficial: <a href="https://www.visitvalencia.com/" target="_blank" rel="noopener">Visit València</a>.</span>
+           <span data-lang="en">If you'd like some city time too. Note: Valencia to the venue is ~1 h 10 by car. Official guide: <a href="https://www.visitvalencia.com/en" target="_blank" rel="noopener">Visit València</a>.</span></p>
+      </div>
+    </div>
+    <p class="hint"><span data-lang="es">Junio es temporada alta en la zona — reserva con tiempo. Qué ver y comer: <a href="https://www.turismorequena.es/" target="_blank" rel="noopener">Turismo Requena</a>.</span>
+       <span data-lang="en">June is high season around here — book early. What to see and eat: <a href="https://www.turismorequena.es/" target="_blank" rel="noopener">Turismo Requena</a>.</span></p>
+  </div>
+</section>
+
+
+
+
+
+<!-- ============ PRÓXIMAMENTE ============ -->
+<section id="pronto">
+  <div class="wrap narrow" style="text-align:center">
+    <h2><span data-lang="es">Próximamente</span><span data-lang="en">Coming soon</span></h2>
+    <p class="sub-h"><span data-lang="es">La web irá creciendo durante el año</span><span data-lang="en">This site will keep growing through the year</span></p>
+    <div class="grid g2" style="text-align:left;max-width:640px;margin:0 auto">
+      <div class="card"><h3>🕰️ <span data-lang="es">El día</span><span data-lang="en">The day</span></h3>
+        <p><span data-lang="es">Horario de la ceremonia, el cóctel, el banquete y la fiesta.</span><span data-lang="en">Times for the ceremony, cocktail, dinner and party.</span></p></div>
+      <div class="card"><h3>🚌 <span data-lang="es">Autobús desde Requena</span><span data-lang="en">Shuttle from Requena</span></h3>
+        <p><span data-lang="es">Paradas y horarios de ida y vuelta.</span><span data-lang="en">Stops and times, there and back.</span></p></div>
+      <div class="card"><h3>👗 <span data-lang="es">Vestimenta</span><span data-lang="en">Dress code</span></h3>
+        <p><span data-lang="es">Qué ponerse para un día de campo en junio.</span><span data-lang="en">What to wear for a June day in the countryside.</span></p></div>
+      <div class="card"><h3>✉️ <span data-lang="es">Confirmar asistencia</span><span data-lang="en">RSVP</span></h3>
+        <p><span data-lang="es">El formulario para decirnos que vienes, con quién y qué necesitas.</span><span data-lang="en">The form to tell us you're coming, with whom, and what you need.</span></p></div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <p class="names">
+    Sara
+    &amp;
+    Emmanuel
+  </p>
+  <p style="font-family:'Fraunces',serif;font-size:15px;opacity:.9;letter-spacing:.04em">
+     Sara Buezo-Montero &amp; Juan Emmanuel Johnson</p>
+  <p>5 · 06 · 2027 · <a class="lnk" href="https://vilasira.com/" target="_blank" rel="noopener">Vilasira</a>, Venta del Moro (Valencia)</p>
+  <div class="sep"></div>
+  <p><span data-lang="es">¿Dudas? Escríbenos:</span><span data-lang="en">Questions? Message us:</span>
+     <a href="#"><span class="placeholder" style="background:rgba(228,183,160,.25);border-color:rgba(228,183,160,.6)">Contacto</span></a></p>
+  <p style="margin-top:14px;font-size:12px;opacity:.65">
+    <span data-lang="es">Web actualizada por última vez en septiembre de 2026 — seguirá creciendo.</span>
+    <span data-lang="en">Site last updated September 2026 — it'll keep growing.</span></p>
+</footer>
+
+<script>
+  /* idioma */
+  const b=document.body,es=document.getElementById('btn-es'),en=document.getElementById('btn-en');
+  function set(l, push=true){
+    b.className=l;
+    es.setAttribute('aria-pressed',l==='es'); en.setAttribute('aria-pressed',l==='en');
+    document.documentElement.lang=l;
+    /* solo se envía el desplegable del idioma visible */
+    document.querySelectorAll('select[data-lang]').forEach(x=>x.disabled = x.dataset.lang!==l);
+    if(push){ const u=new URL(location); u.searchParams.set('lang',l); history.replaceState(null,'',u); }
+  }
+  es.onclick=()=>set('es'); en.onclick=()=>set('en');
+  /* idioma inicial: ?lang=en en la URL, si no, español */
+  set(new URLSearchParams(location.search).get('lang')==='en' ? 'en' : 'es', false);
+
+  /* cuenta atrás — 5 junio 2027, 12:00 hora peninsular (CEST = UTC+2) */
+  const target = Date.parse('2027-06-05T12:00:00+02:00');
+  const el={d:document.getElementById('cd-d'),h:document.getElementById('cd-h'),
+            m:document.getElementById('cd-m'),s:document.getElementById('cd-s')};
+  function tick(){
+    let ms = target - Date.now();
+    if (ms < 0) ms = 0;
+    const s = Math.floor(ms/1000);
+    el.d.textContent = Math.floor(s/86400);
+    el.h.textContent = String(Math.floor(s%86400/3600)).padStart(2,'0');
+    el.m.textContent = String(Math.floor(s%3600/60)).padStart(2,'0');
+    el.s.textContent = String(s%60).padStart(2,'0');
+  }
+  tick(); setInterval(tick,1000);
+</script>
 </body>
 </html>
