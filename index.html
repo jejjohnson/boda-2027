@@ -129,9 +129,9 @@
   .hero .scene{display:block;width:min(360px,86%);margin:clamp(22px,5vw,32px) auto 0}
 
   /* countdown */
-  .count{display:flex;justify-content:center;gap:clamp(8px,3vw,22px);margin:clamp(26px,6vw,36px) 0 6px;flex-wrap:wrap}
+  .count{display:flex;justify-content:center;gap:clamp(6px,2vw,18px);margin:clamp(26px,6vw,36px) 0 6px;flex-wrap:wrap}
   .count div{
-    min-width:clamp(58px,17vw,84px);background:var(--cream);border:1.5px solid var(--burgundy);
+    min-width:clamp(56px,16vw,84px);background:var(--cream);border:1.5px solid var(--burgundy);
     border-radius:var(--radius);padding:12px 6px;
   }
   .count b{
@@ -293,6 +293,7 @@
     <p class="where"><a href="https://vilasira.com/" target="_blank" rel="noopener" style="color:inherit;border-bottom:1px solid rgba(138,117,112,.5);text-decoration:none">Vilasira</a> · Venta del Moro · València</p>
 
     <div class="count" id="count">
+      <div><b id="cd-mo">—</b><span data-lang="es">meses</span><span data-lang="en">months</span></div>
       <div><b id="cd-d">—</b><span data-lang="es">días</span><span data-lang="en">days</span></div>
       <div><b id="cd-h">—</b><span data-lang="es">horas</span><span data-lang="en">hours</span></div>
       <div><b id="cd-m">—</b><span data-lang="es">min</span><span data-lang="en">min</span></div>
@@ -514,12 +515,23 @@
 
   /* cuenta atrás — 5 junio 2027, 12:00 hora peninsular (CEST = UTC+2) */
   const target = Date.parse('2027-06-05T12:00:00+02:00');
-  const el={d:document.getElementById('cd-d'),h:document.getElementById('cd-h'),
+  const el={mo:document.getElementById('cd-mo'),d:document.getElementById('cd-d'),h:document.getElementById('cd-h'),
             m:document.getElementById('cd-m'),s:document.getElementById('cd-s')};
+  /* suma meses de calendario sin desbordar (31 ene + 1 mes = 28/29 feb, no 3 mar) */
+  function addMonths(d, n){
+    const r = new Date(d), day = r.getDate();
+    r.setDate(1); r.setMonth(r.getMonth() + n);
+    r.setDate(Math.min(day, new Date(r.getFullYear(), r.getMonth() + 1, 0).getDate()));
+    return r;
+  }
   function tick(){
-    let ms = target - Date.now();
-    if (ms < 0) ms = 0;
+    const now = new Date();
+    let months = 0;
+    while (addMonths(now, months + 1) <= target) months++;
+    let ms = target - addMonths(now, months);
+    if (target - now < 0) { months = 0; ms = 0; }
     const s = Math.floor(ms/1000);
+    el.mo.textContent = months;
     el.d.textContent = Math.floor(s/86400);
     el.h.textContent = String(Math.floor(s%86400/3600)).padStart(2,'0');
     el.m.textContent = String(Math.floor(s%3600/60)).padStart(2,'0');
