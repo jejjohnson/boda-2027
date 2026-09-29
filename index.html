@@ -50,14 +50,21 @@
   }
   .nav-inner{
     max-width:var(--maxw);margin:0 auto;padding:9px clamp(12px,4vw,24px);
-    display:flex;align-items:center;gap:12px;
+    display:flex;align-items:center;gap:10px;flex-wrap:wrap;
+  }
+  .nav-inner .lang{margin-left:auto}
+  .nav-inner .lang + .lang{margin-left:0}
+  @media(max-width:640px){
+    .nav-inner .links{order:3;flex-basis:100%;padding-top:6px}
+    .nav-inner .lang{margin-left:auto}
+    .nav-inner .lang + .lang{margin-left:6px}
   }
   .brand{
     font-family:"Caveat",cursive;font-weight:700;font-size:24px;color:var(--burgundy);
     white-space:nowrap;text-decoration:none;flex:0 0 auto;
   }
   .links{
-    flex:1;display:flex;gap:clamp(10px,2.2vw,22px);overflow-x:auto;
+    flex:1 1 0;min-width:0;display:flex;gap:clamp(10px,2.2vw,22px);overflow-x:auto;
     scrollbar-width:none;-ms-overflow-style:none;
   }
   .links::-webkit-scrollbar{display:none}
@@ -194,7 +201,8 @@
   th{background:rgba(168,47,78,.08);font-weight:500;font-size:12px;letter-spacing:.1em;
     text-transform:uppercase;color:var(--burgundy)}
   tr:last-child td{border-bottom:0}
-  .usd{color:var(--muted);font-size:.92em;white-space:nowrap}
+  .money{white-space:nowrap}
+  .lang.cur button{min-width:34px}
   .stamp a{color:inherit;border-bottom:1px solid rgba(168,47,78,.45);text-decoration:none}
   .hint{font-size:12.5px;color:var(--muted);font-style:italic;margin-top:10px;text-align:center}
 
@@ -274,6 +282,10 @@
       <button id="btn-es" aria-pressed="true">ES</button>
       <button id="btn-en" aria-pressed="false">EN</button>
     </div>
+    <div class="lang cur" role="group" aria-label="Moneda / Currency">
+      <button id="cur-eur" aria-pressed="true">€</button>
+      <button id="cur-usd" aria-pressed="false">$</button>
+    </div>
   </div>
 </header>
 
@@ -342,8 +354,8 @@
     <div class="grid g2" style="margin-bottom:clamp(20px,4vw,28px)">
       <div class="card">
         <h3><span data-lang="es">Desde EE. UU.</span><span data-lang="en">From the US</span></h3>
-        <p><span data-lang="es">No hay vuelos directos a València. Lo más cómodo: volar a <strong>Madrid</strong> y coger el tren de alta velocidad hasta <strong>Requena-Utiel</strong> (~1 h 30 los directos; Renfe, Avlo, Iryo y Ouigo, ~13 trenes al día; desde ~15 € <span class="usd" data-eur="15"></span> con antelación, normalmente 25–45 € <span class="usd" data-eur="25-45"></span>). Alternativa: volar a <strong>València</strong> con una escala — <strong>junio es temporada alta</strong>: cuenta con ~900–1.200 $ ida y vuelta desde Nueva York, o ~600–700 $ reservando con meses de antelación.</span>
-           <span data-lang="en">There are no direct flights to València. Easiest: fly to <strong>Madrid</strong>, then the high-speed train to <strong>Requena-Utiel</strong> (~1 h 30 min direct; Renfe, Avlo, Iryo and Ouigo, ~13 trains/day; from ~€15 <span class="usd" data-eur="15"></span> booked ahead, typically €25–45 <span class="usd" data-eur="25-45"></span>). Alternative: fly to <strong>València</strong> with one connection — <strong>June is peak season</strong>: expect ~$900–1,200 round trip from New York, or ~$600–700 if you book months ahead.</span></p>
+        <p><span data-lang="es">No hay vuelos directos a València. Lo más cómodo: volar a <strong>Madrid</strong> y coger el tren de alta velocidad hasta <strong>Requena-Utiel</strong> (~1 h 30 los directos; Renfe, Avlo, Iryo y Ouigo, ~13 trenes al día; desde <span class="money" data-eur="15" data-t="1"></span> con antelación, normalmente <span class="money" data-eur="25-45"></span>). Alternativa: volar a <strong>València</strong> con una escala — <strong>junio es temporada alta</strong>: cuenta con <span class="money" data-usd="900-1200" data-t="1"></span> ida y vuelta desde Nueva York, o <span class="money" data-usd="600-700" data-t="1"></span> reservando con meses de antelación.</span>
+           <span data-lang="en">There are no direct flights to València. Easiest: fly to <strong>Madrid</strong>, then the high-speed train to <strong>Requena-Utiel</strong> (~1 h 30 min direct; Renfe, Avlo, Iryo and Ouigo, ~13 trains/day; from <span class="money" data-eur="15" data-t="1"></span> booked ahead, typically <span class="money" data-eur="25-45"></span>). Alternative: fly to <strong>València</strong> with one connection — <strong>June is peak season</strong>: expect <span class="money" data-usd="900-1200" data-t="1"></span> round trip from New York, or <span class="money" data-usd="600-700" data-t="1"></span> if you book months ahead.</span></p>
       </div>
       <div class="card">
         <h3><span data-lang="es">Desde Europa</span><span data-lang="en">From Europe</span></h3>
@@ -366,25 +378,25 @@
           <tr>
             <td data-lang="es"><a href="https://www.renfe.com/es/es" target="_blank" rel="noopener">AVE</a> · Joaquín Sorolla → Requena-Utiel</td><td data-lang="en"><a href="https://www.renfe.com/es/en" target="_blank" rel="noopener">High-speed train</a> · Joaquín Sorolla → Requena-Utiel</td>
             <td data-lang="es">~25 min</td><td data-lang="en">~25 min</td>
-            <td data-lang="es">~15–25 € <span class="usd" data-eur="15-25"></span></td><td data-lang="en">~€15–25 <span class="usd" data-eur="15-25"></span></td>
+            <td data-lang="es"><span class="money" data-eur="15-25" data-t="1"></span></td><td data-lang="en"><span class="money" data-eur="15-25" data-t="1"></span></td>
             <td data-lang="es">La estación está fuera del pueblo — 10 min en taxi</td><td data-lang="en">Station is outside town — 10 min taxi</td>
           </tr>
           <tr>
             <td data-lang="es"><a href="https://www.requena.es/pagina/como-llegar-requena" target="_blank" rel="noopener">Autobús (Transvia)</a></td><td data-lang="en"><a href="https://www.requena.es/pagina/como-llegar-requena" target="_blank" rel="noopener">Bus (Transvia)</a></td>
             <td data-lang="es">~1 h</td><td data-lang="en">~1 h</td>
-            <td data-lang="es">~7–8 € <span class="usd" data-eur="7-8"></span></td><td data-lang="en">~€7–8 <span class="usd" data-eur="7-8"></span></td>
+            <td data-lang="es"><span class="money" data-eur="7-8" data-t="1"></span></td><td data-lang="en"><span class="money" data-eur="7-8" data-t="1"></span></td>
             <td data-lang="es">~7 al día</td><td data-lang="en">~7 a day</td>
           </tr>
           <tr>
             <td data-lang="es">Coche por la A-3</td><td data-lang="en">Car via the A-3</td>
             <td data-lang="es">~45 min</td><td data-lang="en">~45 min</td>
-            <td data-lang="es">Alquiler ~40–60 €/día <span class="usd" data-eur="40-60"></span> en junio</td><td data-lang="en">Rental ~€40–60/day <span class="usd" data-eur="40-60"></span> in June</td>
+            <td data-lang="es">Alquiler <span class="money" data-eur="40-60" data-t="1"></span>/día en junio</td><td data-lang="en">Rental <span class="money" data-eur="40-60" data-t="1"></span>/day in June</td>
             <td data-lang="es">Lo más fácil para la finca · Parking gratuito</td><td data-lang="en">Easiest for the venue · Free parking</td>
           </tr>
           <tr>
             <td data-lang="es">Taxi / traslado</td><td data-lang="en">Taxi / transfer</td>
             <td data-lang="es">~45–50 min</td><td data-lang="en">~45–50 min</td>
-            <td data-lang="es">~85–100 € <span class="usd" data-eur="85-100"></span></td><td data-lang="en">~€85–100 <span class="usd" data-eur="85-100"></span></td>
+            <td data-lang="es"><span class="money" data-eur="85-100" data-t="1"></span></td><td data-lang="en"><span class="money" data-eur="85-100" data-t="1"></span></td>
             <td data-lang="es">Precio cerrado reservando online</td><td data-lang="en">Fixed price if booked online</td>
           </tr>
         </tbody>
@@ -414,7 +426,7 @@
          <span data-lang="en">A shuttle bus will run <strong>from Requena</strong> to the venue and back (stops and times to come). Coming from <strong>València or elsewhere</strong>? Please arrange your own transport — a car is easiest (~1 h 10 from València, free parking). We encourage carpooling: you'll be able to offer or request a seat here later on.</span></p>
       <span class="price"><span class="tbc"><span data-lang="es">Paradas y horarios por confirmar</span><span data-lang="en">Stops &amp; times TBC</span></span></span>
     </div>
-    <em class="stamp"><span data-lang="es">Precios orientativos consultados en septiembre de 2026 · Dólares al <a href="https://www.ecb.europa.eu/stats/policy_and_exchange_rates/euro_reference_exchange_rates/html/eurofxref-graph-usd.en.html" target="_blank" rel="noopener">tipo de referencia del BCE</a> del 28 de septiembre de 2026 (1 € = <span class="rate"></span> $ · 1 $ = <span class="rate-inv"></span> €)</span><span data-lang="en">Ballpark prices checked September 2026 · Dollar figures at the <a href="https://www.ecb.europa.eu/stats/policy_and_exchange_rates/euro_reference_exchange_rates/html/eurofxref-graph-usd.en.html" target="_blank" rel="noopener">ECB reference rate</a> of 28 September 2026 (€1 = $<span class="rate"></span> · $1 = €<span class="rate-inv"></span>)</span></em>
+    <em class="stamp"><span data-lang="es">Precios orientativos consultados en septiembre de 2026 · Cambio € ⇄ $ al <a href="https://www.ecb.europa.eu/stats/policy_and_exchange_rates/euro_reference_exchange_rates/html/eurofxref-graph-usd.en.html" target="_blank" rel="noopener">tipo de referencia del BCE</a> del 28 de septiembre de 2026 (1 € = <span class="rate"></span> $ · 1 $ = <span class="rate-inv"></span> €)</span><span data-lang="en">Ballpark prices checked September 2026 · Currency conversion at the <a href="https://www.ecb.europa.eu/stats/policy_and_exchange_rates/euro_reference_exchange_rates/html/eurofxref-graph-usd.en.html" target="_blank" rel="noopener">ECB reference rate</a> of 28 September 2026 (€1 = $<span class="rate"></span> · $1 = €<span class="rate-inv"></span>)</span></em>
   </div>
 </section>
 
@@ -429,13 +441,13 @@
         <h3><a href="https://www.hoteldonaanita.com/" target="_blank" rel="noopener">Hotel Doña Anita</a></h3>
         <p><span data-lang="es">Hotel pequeño en la Plaza de Albornoz, en el casco antiguo (Barrio La Villa).</span>
            <span data-lang="en">Small hotel on Plaza de Albornoz, in the old town (Barrio La Villa).</span></p>
-        <span class="price"><span data-lang="es">Doble desde ~75 € <span class="usd" data-eur="75"></span></span><span data-lang="en">Double from ~€75 <span class="usd" data-eur="75"></span></span></span>
+        <span class="price"><span data-lang="es">Doble desde <span class="money" data-eur="75" data-t="1"></span></span><span data-lang="en">Double from <span class="money" data-eur="75" data-t="1"></span></span></span>
       </div>
       <div class="card">
         <h3><a href="https://www.hotelavenidarequena.es/" target="_blank" rel="noopener">Hotel Avenida</a></h3>
         <p><span data-lang="es">Hotel sencillo en el centro de Requena. También en <a href="https://www.booking.com/hotel/es/avenida-requena.html" target="_blank" rel="noopener">Booking</a>.</span>
            <span data-lang="en">Simple hotel in the centre of Requena. Also on <a href="https://www.booking.com/hotel/es/avenida-requena.html" target="_blank" rel="noopener">Booking</a>.</span></p>
-        <span class="price"><span data-lang="es">Doble desde ~55 € <span class="usd" data-eur="55"></span></span><span data-lang="en">Double from ~€55 <span class="usd" data-eur="55"></span></span></span>
+        <span class="price"><span data-lang="es">Doble desde <span class="money" data-eur="55" data-t="1"></span></span><span data-lang="en">Double from <span class="money" data-eur="55" data-t="1"></span></span></span>
       </div>
       <div class="card">
         <h3><span data-lang="es">Casas rurales en La Villa</span><span data-lang="en">Country Houses in La Villa</span></h3>
@@ -510,6 +522,7 @@
     /* solo se envía el desplegable del idioma visible */
     document.querySelectorAll('select[data-lang]').forEach(x=>x.disabled = x.dataset.lang!==l);
     if(push){ const u=new URL(location); u.searchParams.set('lang',l); history.replaceState(null,'',u); }
+    if (document.body.dataset.cur) renderMoney();   /* solo tras inicializar la moneda */
   }
   es.onclick=()=>set('es'); en.onclick=()=>set('en');
   /* idioma inicial: ?lang=en en la URL, si no, español */
@@ -562,17 +575,35 @@
     });
   });
 
-  /* euros → dólares. Para actualizar: cambiar RATE y la fecha del sello. Tipo de referencia del BCE. */
+  /* precios: cada importe se guarda en euros (o en dólares, los vuelos) y se pinta en la moneda
+     elegida. Para actualizar el cambio: RATE aquí y la fecha en la nota. Tipo de referencia del BCE. */
   const RATE = 1.1378;
-  document.querySelectorAll('.rate').forEach(e => e.textContent = RATE.toFixed(2).replace('.', e.closest('[data-lang="es"]') ? ',' : '.'));
-  document.querySelectorAll('.rate-inv').forEach(e => e.textContent = (1/RATE).toFixed(2).replace('.', e.closest('[data-lang="es"]') ? ',' : '.'));
-  document.querySelectorAll('.usd').forEach(e => {
-    const es = !!e.closest('[data-lang="es"]');
-    const n = e.dataset.eur.split('-').map(v => Math.round(v * RATE));
-    const fmt = v => es ? String(v) : v.toLocaleString('en-US');
-    const r = n.map(fmt).join('–');
-    e.textContent = es ? `(~${r} $)` : `(~$${r})`;
-  });
+  const cEur = document.getElementById('cur-eur'), cUsd = document.getElementById('cur-usd');
+  function renderMoney(){
+    const cur = document.body.dataset.cur || 'eur';
+    document.querySelectorAll('.money').forEach(e => {
+      const es = !!e.closest('[data-lang="es"]');
+      const src = e.dataset.eur != null ? 'eur' : 'usd';
+      let n = (e.dataset.eur ?? e.dataset.usd).split('-').map(Number);
+      if (src !== cur) n = n.map(v => Math.round(cur === 'usd' ? v * RATE : v / RATE));
+      const fmt = v => v.toLocaleString(es ? 'es-ES' : 'en-US');
+      const r = n.map(fmt).join('–'), t = e.dataset.t ? '~' : '';
+      e.textContent = cur === 'usd' ? (es ? `${t}${r} $` : `${t}$${r}`) : (es ? `${t}${r} €` : `${t}€${r}`);
+    });
+    const dec = (v, es) => v.toFixed(2).replace('.', es ? ',' : '.');
+    document.querySelectorAll('.rate').forEach(e => e.textContent = dec(RATE, !!e.closest('[data-lang="es"]')));
+    document.querySelectorAll('.rate-inv').forEach(e => e.textContent = dec(1/RATE, !!e.closest('[data-lang="es"]')));
+  }
+  function setCur(c, push=true){
+    document.body.dataset.cur = c;
+    cEur.setAttribute('aria-pressed', c==='eur'); cUsd.setAttribute('aria-pressed', c==='usd');
+    renderMoney();
+    if(push){ const u=new URL(location); u.searchParams.set('cur',c); history.replaceState(null,'',u); }
+  }
+  cEur.onclick=()=>setCur('eur'); cUsd.onclick=()=>setCur('usd');
+  /* moneda inicial: ?cur= en la URL; si no, dólares cuando la web abre en inglés */
+  const qs = new URLSearchParams(location.search);
+  setCur(qs.get('cur') === 'usd' || (qs.get('cur') == null && qs.get('lang') === 'en') ? 'usd' : 'eur', false);
 </script>
 </body>
 </html>
