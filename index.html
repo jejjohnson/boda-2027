@@ -426,7 +426,7 @@
          <span data-lang="en">A shuttle bus will run <strong>from Requena</strong> to the venue and back (stops and times to come). Coming from <strong>València or elsewhere</strong>? Please arrange your own transport — a car is easiest (~1 h 10 from València, free parking). We encourage carpooling: you'll be able to offer or request a seat here later on.</span></p>
       <span class="price"><span class="tbc"><span data-lang="es">Paradas y horarios por confirmar</span><span data-lang="en">Stops &amp; times TBC</span></span></span>
     </div>
-    <em class="stamp"><span data-lang="es">Precios orientativos consultados en septiembre de 2026 · Cambio € ⇄ $ al <a href="https://www.ecb.europa.eu/stats/policy_and_exchange_rates/euro_reference_exchange_rates/html/eurofxref-graph-usd.en.html" target="_blank" rel="noopener">tipo de referencia del BCE</a> del 28 de septiembre de 2026 (1 € = <span class="rate"></span> $ · 1 $ = <span class="rate-inv"></span> €)</span><span data-lang="en">Ballpark prices checked September 2026 · Currency conversion at the <a href="https://www.ecb.europa.eu/stats/policy_and_exchange_rates/euro_reference_exchange_rates/html/eurofxref-graph-usd.en.html" target="_blank" rel="noopener">ECB reference rate</a> of 28 September 2026 (€1 = $<span class="rate"></span> · $1 = €<span class="rate-inv"></span>)</span></em>
+    <em class="stamp"><span data-lang="es">Precios orientativos consultados en septiembre de 2026 · Cambio € ⇄ $ al <a href="https://www.ecb.europa.eu/stats/policy_and_exchange_rates/euro_reference_exchange_rates/html/eurofxref-graph-usd.en.html" target="_blank" rel="noopener">tipo de referencia del BCE</a> del 28 de septiembre de 2026 (1 € = $<span class="rate"></span> · $1 = <span class="rate-inv"></span> €)</span><span data-lang="en">Ballpark prices checked September 2026 · Currency conversion at the <a href="https://www.ecb.europa.eu/stats/policy_and_exchange_rates/euro_reference_exchange_rates/html/eurofxref-graph-usd.en.html" target="_blank" rel="noopener">ECB reference rate</a> of 28 September 2026 (1 € = $<span class="rate"></span> · $1 = <span class="rate-inv"></span> €)</span></em>
   </div>
 </section>
 
@@ -588,7 +588,7 @@
       if (src !== cur) n = n.map(v => Math.round(cur === 'usd' ? v * RATE : v / RATE));
       const fmt = v => v.toLocaleString(es ? 'es-ES' : 'en-US');
       const r = n.map(fmt).join('–'), t = e.dataset.t ? '~' : '';
-      e.textContent = cur === 'usd' ? (es ? `${t}${r} $` : `${t}$${r}`) : (es ? `${t}${r} €` : `${t}€${r}`);
+      e.textContent = cur === 'usd' ? `${t}$${r}` : `${t}${r} €`;   /* $ delante, € detrás, en ambos idiomas */
     });
     const dec = (v, es) => v.toFixed(2).replace('.', es ? ',' : '.');
     document.querySelectorAll('.rate').forEach(e => e.textContent = dec(RATE, !!e.closest('[data-lang="es"]')));
