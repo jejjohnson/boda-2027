@@ -414,7 +414,7 @@
          <span data-lang="en">A shuttle bus will run <strong>from Requena</strong> to the venue and back (stops and times to come). Coming from <strong>València or elsewhere</strong>? Please arrange your own transport — a car is easiest (~1 h 10 from València, free parking). We encourage carpooling: you'll be able to offer or request a seat here later on.</span></p>
       <span class="price"><span class="tbc"><span data-lang="es">Paradas y horarios por confirmar</span><span data-lang="en">Stops &amp; times TBC</span></span></span>
     </div>
-    <em class="stamp"><span data-lang="es">Precios orientativos consultados en septiembre de 2026 · Dólares al <a href="https://www.ecb.europa.eu/stats/policy_and_exchange_rates/euro_reference_exchange_rates/html/eurofxref-graph-usd.en.html" target="_blank" rel="noopener">tipo de referencia del BCE</a> del 28 de septiembre de 2026 (1 € = <span class="rate"></span> $)</span><span data-lang="en">Ballpark prices checked September 2026 · Dollar figures at the <a href="https://www.ecb.europa.eu/stats/policy_and_exchange_rates/euro_reference_exchange_rates/html/eurofxref-graph-usd.en.html" target="_blank" rel="noopener">ECB reference rate</a> of 28 September 2026 (€1 = $<span class="rate"></span>)</span></em>
+    <em class="stamp"><span data-lang="es">Precios orientativos consultados en septiembre de 2026 · Dólares al <a href="https://www.ecb.europa.eu/stats/policy_and_exchange_rates/euro_reference_exchange_rates/html/eurofxref-graph-usd.en.html" target="_blank" rel="noopener">tipo de referencia del BCE</a> del 28 de septiembre de 2026 (1 € = <span class="rate"></span> $ · 1 $ = <span class="rate-inv"></span> €)</span><span data-lang="en">Ballpark prices checked September 2026 · Dollar figures at the <a href="https://www.ecb.europa.eu/stats/policy_and_exchange_rates/euro_reference_exchange_rates/html/eurofxref-graph-usd.en.html" target="_blank" rel="noopener">ECB reference rate</a> of 28 September 2026 (€1 = $<span class="rate"></span> · $1 = €<span class="rate-inv"></span>)</span></em>
   </div>
 </section>
 
@@ -565,6 +565,7 @@
   /* euros → dólares. Para actualizar: cambiar RATE y la fecha del sello. Tipo de referencia del BCE. */
   const RATE = 1.1378;
   document.querySelectorAll('.rate').forEach(e => e.textContent = RATE.toFixed(2).replace('.', e.closest('[data-lang="es"]') ? ',' : '.'));
+  document.querySelectorAll('.rate-inv').forEach(e => e.textContent = (1/RATE).toFixed(2).replace('.', e.closest('[data-lang="es"]') ? ',' : '.'));
   document.querySelectorAll('.usd').forEach(e => {
     const es = !!e.closest('[data-lang="es"]');
     const n = e.dataset.eur.split('-').map(v => Math.round(v * RATE));
