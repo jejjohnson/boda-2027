@@ -8,28 +8,47 @@
 }
 #rsvp legend + *{clear:both}
 #rsvp fieldset{min-width:0}
+#rsvp .rsvp-person{position:relative}
 #rsvp .rsvp-person legend.rsvp-name{
   font-family:"Caveat",cursive;font-weight:700;font-size:clamp(26px,6.5vw,30px);
   letter-spacing:0;text-transform:none;line-height:1.1;
 }
+#rsvp .rsvp-person > label{margin-bottom:12px}
+#rsvp .rsvp-remove{
+  position:absolute;top:12px;right:14px;background:none;border:0;cursor:pointer;font:inherit;
+  font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);text-decoration:underline;
+}
 #rsvp legend.rsvp-free{text-transform:none;letter-spacing:0;font-size:15px;font-weight:500}
-#rsvp .if-yes,#rsvp .rsvp-household{display:grid;gap:16px}
+#rsvp .if-yes,#rsvp .rsvp-household,#rsvp .rsvp-people{display:grid;gap:16px}
 #rsvp .if-yes{margin-top:16px;padding-top:16px;border-top:1px dashed rgba(168,47,78,.35)}
 #rsvp .radios label:has(input:checked){border-color:var(--burgundy);background:rgba(168,47,78,.07)}
 #rsvp .radios input{accent-color:var(--burgundy)}
+#rsvp .radios.stack label{flex-basis:100%}
 #rsvp .missing .radios label,#rsvp .missing.rsvp-person{border-color:#C0392B}
-#rsvp .missing > legend{color:#C0392B}
+#rsvp .missing > legend,#rsvp .missing > label{color:#C0392B}
 #rsvp .rsvp-hello{
   text-align:center;font-family:"Caveat",cursive;font-weight:700;color:var(--burgundy);
-  font-size:clamp(30px,8vw,38px);line-height:1.1;
+  font-size:clamp(30px,8vw,38px);line-height:1.1;text-wrap:balance;
 }
 #rsvp .rsvp-deadline{margin-bottom:0}
-#rsvp .rsvp-code p{font-size:14.5px;margin-bottom:14px}
-#rsvp .rsvp-code-row{display:flex;gap:10px;align-items:center}
-#rsvp .rsvp-code-row input{
-  flex:1 1 auto;min-width:0;font-size:18px;letter-spacing:.2em;text-transform:uppercase;text-align:center;
+#rsvp .rsvp-search{display:grid;gap:14px;justify-items:center}
+#rsvp .rsvp-search > p:first-child{font-size:14.5px;justify-self:stretch}
+#rsvp .rsvp-row2{display:grid;grid-template-columns:1fr 1fr;gap:12px;justify-self:stretch}
+@media(max-width:420px){ #rsvp .rsvp-row2{grid-template-columns:1fr} }
+#rsvp .rsvp-center{display:grid;gap:14px;justify-items:center;text-align:center}
+#rsvp .rsvp-center p{font-size:14.5px}
+#rsvp .rsvp-q{font-family:"Caveat",cursive;font-weight:700;font-size:clamp(26px,7vw,32px)!important;color:var(--burgundy);line-height:1.15;text-wrap:balance}
+#rsvp .rsvp-q strong{font-weight:700}
+#rsvp .rsvp-btns{display:flex;gap:12px;flex-wrap:wrap;justify-content:center}
+#rsvp .rsvp-pick{display:grid;gap:10px;justify-self:stretch}
+#rsvp .rsvp-choice{
+  display:grid;gap:2px;text-align:left;font:inherit;cursor:pointer;color:var(--ink);
+  background:var(--cream);border:1.5px solid rgba(168,47,78,.4);border-radius:10px;padding:12px 16px;
 }
-#rsvp .rsvp-code-row .btn{flex:0 0 auto;padding-left:22px;padding-right:22px}
+#rsvp .rsvp-choice strong{font-weight:500;font-size:16px;color:var(--burgundy)}
+#rsvp .rsvp-choice span{font-size:13px;color:var(--muted)}
+#rsvp .rsvp-choice:hover,#rsvp .rsvp-choice:focus-visible{border-color:var(--burgundy);background:rgba(168,47,78,.07)}
+#rsvp .rsvp-add{justify-self:center}
 #rsvp .rsvp-actions{display:grid;gap:10px;justify-items:center;margin-top:6px}
 #rsvp .rsvp-msg{font-size:13.5px;color:var(--muted);text-align:center;font-style:italic}
 #rsvp .rsvp-msg:empty{display:none}
@@ -38,4 +57,3 @@
 #rsvp .rsvp-thanks{text-align:center;display:grid;gap:10px;justify-items:center}
 #rsvp .rsvp-hp{position:absolute;left:-9999px;width:1px;height:1px;opacity:0}
 #rsvp .btn[disabled]{opacity:.55;cursor:wait}
-#rsvp .radios.stack label{flex-basis:100%}

@@ -27,9 +27,11 @@ git add -A && git commit -m "Actualizar horarios" && git push
 
 ## RSVP
 
-Las respuestas van a una hoja de Google privada a través de un Apps Script: sin contraseñas ni
-claves en el repo, y **una fila por invitación** (cada invitación lleva su código; reenviar
-actualiza, no duplica). Puesta en marcha: [`apps-script/README.md`](apps-script/README.md).
-Probar sin tocar la hoja: `?mock=1&c=TEST01`.
+Un solo enlace para todos: cada invitado busca su nombre y responde por su hogar. Las
+respuestas van a una hoja de Google privada a través de un Apps Script: sin contraseñas ni
+claves en el repo, y **una fila por hogar** (reenviar actualiza, no duplica). Quien no aparece
+en la lista puede responder igualmente y queda en «PENDIENTES» para revisarlo.
+Puesta en marcha: [`apps-script/README.md`](apps-script/README.md).
+Probar sin tocar la hoja: `?mock=1` (busca «Ana Prueba», «Lucía García» o «Maika Ruiz»).
 
-- Nunca subir aquí la lista de invitados ni los códigos (el `.gitignore` bloquea las exportaciones).
+- Nunca subir aquí la lista de invitados (el `.gitignore` bloquea las exportaciones).

@@ -5,7 +5,14 @@ script hace de puente. **No hay contraseñas ni claves:** el script corre con nu
 Google y la hoja sigue siendo privada. Diseño completo: [`docs/rsvp-design.md`](../docs/rsvp-design.md).
 
 ```
-Web (pública)  ──GET/POST──▶  Apps Script (corre como nosotros)  ──▶  Hoja «RSVP Boda 2027» (privada)
+Web (un enlace para todos)
+        │  «Lucía García»
+        ▼
+Apps Script: busca el nombre en PERSONAS
+        │  (sin acentos, mayúsculas ni erratas pequeñas)
+        ▼
+Responde por todo su hogar → se ACTUALIZA su fila
+(si no aparece → PENDIENTES, para revisarlo a mano)
 ```
 
 ## Puesta en marcha (una vez, ~10 min)
@@ -14,8 +21,8 @@ Web (pública)  ──GET/POST──▶  Apps Script (corre como nosotros)  ─�
 2. **Pegar el script.** En la hoja: *Extensiones → Apps Script*. Borrar lo que haya en `Code.gs`
    y pegar [`Code.gs`](Code.gs). Guardar (⌘S).
 3. **Preparar las pestañas.** En el editor, elegir la función `setup` y pulsar *Ejecutar*. Google
-   pedirá permiso para que el script use **esta hoja** — aceptar. Se crean `HOGARES`,
-   `PERSONAS`, `LOG` y `TEXTOS`, y un hogar de prueba `TEST01`.
+   pedirá permiso para que el script use **esta hoja**: aceptar. Se crean `PERSONAS`, `HOGARES`,
+   `PENDIENTES`, `LOG` y `TEXTOS`, con un hogar de prueba (Ana y Bruno Prueba).
 4. **Probar.** Ejecutar `selfTest`. Todas las líneas deben salir con ✓.
 5. **Publicar.** *Implementar → Nueva implementación → Tipo: Aplicación web*.
    - *Ejecutar como:* **Yo**
@@ -24,42 +31,58 @@ Web (pública)  ──GET/POST──▶  Apps Script (corre como nosotros)  ─�
    Copiar la URL que acaba en `/exec`.
 6. **Conectar la web.** Pegar esa URL en [`rsvp/config.js`](../rsvp/config.js), commit y push.
    La sección RSVP aparece sola en cuanto hay URL.
-7. **Probar de verdad.** Abrir `…/boda-2027/?c=TEST01#rsvp` en el móvil (con datos, no wifi),
+7. **Probar de verdad.** Abrir la web en el móvil (con datos, no wifi), buscar «Ana Prueba»,
    enviar dos veces y comprobar que en `HOGARES` sigue habiendo **una** fila con `N.º ENVÍOS` = 2.
+   Después, borrar las filas de prueba.
 
 ## Rellenar invitados
 
+Solo hay que rellenar **PERSONAS** (se puede pegar desde la pestaña INVITADOS del workbook):
+
 ```
-HOGARES                         PERSONAS
-───────────────────────         ──────────────────────────────
-HOGAR        IDIOMA  …          HOGAR          NOMBRE    ACOMPAÑANTE
-Familia García  en              Familia García  Lucía
-Tía Carmen      es              Familia García  Pablo
-                                Tía Carmen      Carmen
-                                Tía Carmen      +1        ✓
+HOGAR           NOMBRE            APELLIDOS       ALIAS        ACOMPAÑANTE
+Familia García  Lucía             García López
+Familia García  Pablo             García López
+Familia García  +1                                             ✓
+                María del Carmen  Ruiz Pérez      Mari Carmen; Maika
+                José              Fernández       Pepe
 ```
 
-- Una fila por **invitación** en `HOGARES` y una por **persona** en `PERSONAS`, enlazadas por el
-  texto de `HOGAR` (tiene que ser **único**).
-- `ACOMPAÑANTE` = ✓ en las plazas «+1»: el invitado escribe el nombre en el formulario.
+- **HOGAR** agrupa a quienes van juntos: uno responde por todos. En blanco = va solo/a.
+- **APELLIDOS** es imprescindible: sin apellido no se le puede encontrar. Basta con que el
+  invitado escriba uno de ellos.
+- **ALIAS** (opcional): apodos que no se parecen al nombre («Pepe», «Maika»), separados por `;`.
+  Las tildes, mayúsculas y erratas pequeñas ya se toleran solas.
+- **ACOMPAÑANTE** = ✓ en las plazas «+1»: el invitado escribe el nombre en el formulario. Los +1
+  no se buscan; la web les dice que busquen a quien les invitó.
+
+Luego: menú **Boda → Preparar invitados**. Crea las filas de `HOGARES`, pone las claves internas
+y avisa de personas sin apellido o nombres repetidos. Se puede repetir siempre que se añadan
+invitados.
+
+En `HOGARES` se marcan dos cosas por hogar:
+
 - `TIENE BEBÉS` = ✓ para preguntar trona / cuna / menú infantil.
 - `PREGUNTA PRIVADA` = ✓ para los hogares que deben ver la pregunta privada. El texto (ES/EN) se
   escribe en la pestaña `TEXTOS`, fila `PREGUNTA_PRIVADA`. **Nunca va en el repo.**
-- Luego: menú **Boda → Generar códigos y enlaces**. Rellena `CÓDIGO`, `ENLACE` e `ID`, y avisa
-  de hogares repetidos o personas sin hogar. Se puede repetir: nunca cambia un código ya dado.
-- La columna `ENLACE` es lo que va en cada invitación.
 
-Las columnas de la derecha (`RESPONDIDO`, `ASISTEN`, `AUTOBÚS`…) las escribe el script. Las
-cabeceras se buscan por nombre: se pueden reordenar o añadir columnas propias.
+## Leer las respuestas
+
+| Pestaña | Qué mirar |
+|---|---|
+| `HOGARES` | `RESPONDIDO`, `ASISTEN` (3 / 4), `RESPONDIÓ` (quién envió), autobús, coche… Filtrar por `RESPONDIDO` vacío = quién falta |
+| `PERSONAS` | Una fila por invitado: `ASISTE`, `MENÚ`, `ALERGIAS`, nombre del +1 |
+| `PENDIENTES` | Gente que no encontramos. Ver quién es, apuntarlo en `NOTA` y pasarlo a mano |
+| `LOG` | Historial de todos los envíos, por si alguien cambia algo y hay que mirar |
 
 ## Ajustes
 
 | Qué | Dónde |
 |---|---|
-| Paradas del autobús | `CONFIG.AUTOBUS` en `Code.gs` — mismas etiquetas que el desplegable del workbook, sin comas |
+| Paradas del autobús | `CONFIG.AUTOBUS` en `Code.gs`, mismas etiquetas que el desplegable del workbook, sin comas |
 | Opciones de menú | `CONFIG.MENU` |
 | Fecha límite | *Configuración del proyecto → Propiedades del script*: `RSVP_DEADLINE` = `2027-04-15` |
-| Dominio propio | `CONFIG.SITE_URL`, y volver a *Generar códigos y enlaces* |
+| Tolerancia de la búsqueda | `CONFIG.UMBRAL` (0.88). Más bajo = más permisivo con erratas, más falsos parecidos |
 
 ## Actualizar el script sin cambiar la URL
 
@@ -71,8 +94,9 @@ cabeceras se buscan por nombre: se pueden reordenar o añadir columnas propias.
 
 | Público (repo) | Privado (Google) |
 |---|---|
-| Este script y la web | La hoja: nombres, códigos, respuestas |
+| Este script y la web | La hoja: nombres y respuestas |
 | La URL `/exec` | El texto de la pregunta privada (`TEXTOS`) |
 | | El permiso que dimos al publicar |
 
-La URL `/exec` no es un secreto: permite **enviar** con un código válido, no **leer** la hoja.
+La URL `/exec` permite **buscar** por nombre y apellido completos y **enviar** respuestas.
+Nunca deja **leer** la hoja ni las respuestas de nadie.

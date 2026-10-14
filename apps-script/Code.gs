@@ -4,11 +4,19 @@
  * Backend del formulario RSVP de la web. Va pegado en el editor de Apps Script de la hoja
  * «RSVP Boda 2027» (Extensiones → Apps Script) y se publica como aplicación web.
  *
- * Este archivo es PÚBLICO (vive en el repo): no contiene secretos, nombres ni códigos.
- * Los datos y los textos privados viven solo en la hoja. Diseño: docs/rsvp-design.md
+ * Este archivo es PÚBLICO (vive en el repo): no contiene secretos, nombres ni textos privados.
+ * Los datos viven solo en la hoja. Diseño: docs/rsvp-design.md
  *
- *   GET  ?action=lookup&code=XXXXXX  → datos del hogar (nombres de pila, opciones, respuesta previa)
- *   POST (text/plain, cuerpo JSON)   → guarda la respuesta: ACTUALIZA la fila del código, nunca añade
+ * Un solo enlace para todos. El invitado escribe su nombre, se busca (sin exigir acentos,
+ * mayúsculas ni ortografía perfecta) en la lista de PERSONAS, y responde por todo su hogar.
+ * Siempre se ACTUALIZA la fila del hogar encontrado: reenviar no duplica.
+ * Si no aparece en la lista, puede responder igualmente: va a PENDIENTES para revisarlo a mano
+ * (también sin duplicar: misma persona = misma fila).
+ *
+ *   GET  ?action=buscar&nombre=…&apellidos=…  → candidatos [{id, etiqueta}] + opciones
+ *   GET  ?action=hogar&id=PERSONA-ID          → nombres de pila del hogar + preguntas que tocan
+ *   POST (text/plain, JSON) tipo:'hogar'      → actualiza el hogar
+ *   POST (text/plain, JSON) tipo:'pendiente'  → actualiza/crea su fila en PENDIENTES
  */
 
 // ───────────────────────── Configuración ─────────────────────────
@@ -22,22 +30,27 @@ const CONFIG = {
   COCHE: ['Ofrezco plazas', 'Busco plaza', 'No'],
   BEBES: ['Trona', 'Cuna', 'Menú infantil'],
   MAX_TEXTO: 500,
-  // Si hay demasiados códigos fallidos en 10 min, se pausa la búsqueda (anti-adivinanzas).
-  MAX_FALLOS: 60,
-  // Web pública: se usa para construir los enlaces personales. Cambiar si hay dominio propio.
-  SITE_URL: 'https://jejjohnson.github.io/boda-2027/',
+  MAX_PERSONAS_PENDIENTE: 8,
+  // Parecido mínimo (0–1) de nombre y de apellido para dar a alguien por encontrado.
+  UMBRAL: 0.88,
+  // Dos candidatos a menos de esta distancia se consideran empate → se pregunta «¿cuál eres?».
+  EMPATE: 0.08,
+  // Límite de búsquedas por cada 10 min (anti-abuso). Por encima, «inténtalo en unos minutos».
+  MAX_BUSQUEDAS: 400,
 };
 
-const ALFABETO = '23456789ABCDEFGHJKMNPQRSTUVWXYZ';   // sin 0/O ni 1/I/L
-const LARGO_CODIGO = 6;
+const ALFABETO = '23456789ABCDEFGHJKMNPQRSTUVWXYZ';   // claves internas de hogar
+const PARTICULAS = new Set(['de', 'del', 'la', 'las', 'los', 'y', 'i', 'da', 'do', 'van', 'von', 'e']);
 
 const H = {   // cabeceras: el script localiza las columnas por nombre, se pueden reordenar
-  HOGARES: ['CÓDIGO', 'HOGAR', 'IDIOMA', 'PREGUNTA PRIVADA', 'TIENE BEBÉS', 'ENLACE',
-            'RESPONDIDO', 'ASISTEN', 'AUTOBÚS', 'COCHE COMPARTIDO', 'RESPUESTA PRIVADA',
-            'BEBÉS', 'MENSAJE', 'ACTUALIZADO', 'N.º ENVÍOS'],
-  PERSONAS: ['HOGAR', 'NOMBRE', 'ACOMPAÑANTE', 'CÓDIGO', 'ID',
+  PERSONAS: ['HOGAR', 'NOMBRE', 'APELLIDOS', 'ALIAS', 'ACOMPAÑANTE', 'CÓDIGO', 'ID',
              'ASISTE', 'NOMBRE +1', 'MENÚ', 'ALERGIAS'],
-  LOG: ['FECHA', 'CÓDIGO', 'IDIOMA', 'DATOS'],
+  HOGARES: ['CÓDIGO', 'HOGAR', 'PREGUNTA PRIVADA', 'TIENE BEBÉS',
+            'RESPONDIDO', 'RESPONDIÓ', 'ASISTEN', 'AUTOBÚS', 'COCHE COMPARTIDO', 'RESPUESTA PRIVADA',
+            'BEBÉS', 'MENSAJE', 'ACTUALIZADO', 'N.º ENVÍOS'],
+  PENDIENTES: ['CLAVE', 'NOMBRE ESCRITO', 'PERSONAS', 'ASISTEN', 'AUTOBÚS', 'COCHE COMPARTIDO',
+               'MENSAJE', 'ACTUALIZADO', 'N.º ENVÍOS', 'NOTA'],
+  LOG: ['FECHA', 'TIPO', 'REFERENCIA', 'IDIOMA', 'DATOS'],
   TEXTOS: ['CLAVE', 'ES', 'EN'],
 };
 
@@ -45,7 +58,8 @@ const H = {   // cabeceras: el script localiza las columnas por nombre, se puede
 
 function doGet(e) {
   const p = (e && e.parameter) || {};
-  if (p.action === 'lookup') return json_(lookup_(p.code));
+  if (p.action === 'buscar') return json_(buscar_(p.nombre, p.apellidos));
+  if (p.action === 'hogar') return json_(hogar_(p.id));
   return json_({ ok: true, servicio: 'rsvp' });
 }
 
@@ -59,176 +73,287 @@ function doPost(e) {
   return json_(submit_(data));
 }
 
-// ───────────────────────── Lógica ─────────────────────────
+// ───────────────────────── Búsqueda por nombre ─────────────────────────
 
-function lookup_(rawCode) {
-  const code = normCode_(rawCode);
-  if (!code) return { ok: false, error: 'code_not_found' };
-  if (demasiadosFallos_()) return { ok: false, error: 'busy' };
+/** Normaliza: sin acentos, minúsculas, solo letras y espacios. «M.ª José» → «m a jose». */
+function norm_(s) {
+  return String(s == null ? '' : s).normalize('NFD').replace(/[̀-ͯ]/g, '')
+    .toLowerCase().replace(/[^a-z\s]/g, ' ').replace(/\s+/g, ' ').trim();
+}
+function tokens_(s) { return norm_(s).split(' ').filter(t => t && !PARTICULAS.has(t)); }
 
+/** Parecido Jaro-Winkler entre 0 y 1. Tolera erratas pequeñas («Garsia» ≈ «García»). */
+function jw_(a, b) {
+  if (a === b) return 1;
+  const la = a.length, lb = b.length;
+  if (!la || !lb) return 0;
+  const win = Math.max(0, Math.floor(Math.max(la, lb) / 2) - 1);
+  const ma = new Array(la).fill(false), mb = new Array(lb).fill(false);
+  let m = 0;
+  for (let i = 0; i < la; i++) {
+    for (let j = Math.max(0, i - win); j < Math.min(i + win + 1, lb); j++) {
+      if (mb[j] || a[i] !== b[j]) continue;
+      ma[i] = mb[j] = true; m++; break;
+    }
+  }
+  if (!m) return 0;
+  let t = 0, k = 0;
+  for (let i = 0; i < la; i++) {
+    if (!ma[i]) continue;
+    while (!mb[k]) k++;
+    if (a[i] !== b[k]) t++;
+    k++;
+  }
+  const jaro = (m / la + m / lb + (m - t / 2) / m) / 3;
+  let p = 0;
+  while (p < 4 && p < la && p < lb && a[p] === b[p]) p++;
+  return jaro + p * 0.1 * (1 - jaro);
+}
+
+/** Mejor parecido entre alguna forma escrita y alguna forma de la lista (palabra a palabra o todo junto). */
+function mejor_(escritas, lista) {
+  let best = 0;
+  escritas.forEach(a => lista.forEach(b => { best = Math.max(best, jw_(a, b)); }));
+  return best;
+}
+function formas_(toks) { return toks.length > 1 ? toks.concat(toks.join('')) : toks; }
+
+/**
+ * Puntúa a una persona de la lista frente a lo escrito.
+ * Nombre: vale cualquiera de sus nombres, el compuesto junto («maricarmen») o un ALIAS.
+ * Apellido: basta con que UNO de los apellidos escritos se parezca a uno de los suyos
+ * (casi nadie escribe el segundo apellido).
+ */
+function puntuar_(qNombre, qApellidos, persona) {
+  const nombres = formas_(persona.nombre);
+  persona.alias.forEach(a => { nombres.push(...formas_(a)); });
+  const sN = mejor_(formas_(qNombre), nombres);
+  if (sN < CONFIG.UMBRAL) return 0;
+  const porApellido = qApellidos.map(q => mejor_([q], persona.apellidos));
+  const sA = Math.max.apply(null, porApellido.concat(mejor_([qApellidos.join('')], [persona.apellidos.join('')])));
+  if (sA < CONFIG.UMBRAL) return 0;
+  const media = porApellido.reduce((x, y) => x + y, 0) / porApellido.length;
+  return sN + sA + 0.4 * media;   // escribir los dos apellidos desempata
+}
+
+function buscar_(nombre, apellidos) {
+  const base = { ok: true, opciones: opciones_(), plazo: plazo_(), cerrado: cerrado_() };
+  const qN = tokens_(nombre), qA = tokens_(apellidos);
+  if (!qN.length || !qA.length) return Object.assign(base, { candidatos: [] });
+  if (contar_('busquedas') > CONFIG.MAX_BUSQUEDAS) return { ok: false, error: 'busy' };
+
+  const per = table_('PERSONAS');
+  const lista = per.rows
+    .filter(r => r[per.col['ID']] && !yes_(r[per.col['ACOMPAÑANTE']]))
+    .map(r => ({
+      id: String(r[per.col['ID']]),
+      code: normCode_(r[per.col['CÓDIGO']]),
+      nombreTxt: String(r[per.col['NOMBRE']] || '').trim(),
+      apellidosTxt: String(r[per.col['APELLIDOS']] || '').trim(),
+      nombre: tokens_(r[per.col['NOMBRE']]),
+      apellidos: tokens_(r[per.col['APELLIDOS']]),
+      alias: String(r[per.col['ALIAS']] || '').split(/[;,]/).map(tokens_).filter(a => a.length),
+    }))
+    .filter(p => p.nombre.length && p.apellidos.length);
+
+  const hits = lista.map(p => ({ p, s: puntuar_(qN, qA, p) })).filter(h => h.s > 0).sort((a, b) => b.s - a.s);
+  if (!hits.length) return Object.assign(base, { candidatos: [] });
+
+  const top = hits[0].s;
+  const elegidos = hits.filter(h => h.s >= top - CONFIG.EMPATE).slice(0, 3);
+  const varios = elegidos.length > 1;
+  const candidatos = elegidos.map(({ p }) => {
+    const etiqueta = p.nombreTxt + ' ' + (p.apellidosTxt.split(/\s+/)[0] || '');
+    // Si hay empate, se añaden los nombres de pila de su hogar para que se reconozca.
+    const con = varios
+      ? per.rows.filter(r => normCode_(r[per.col['CÓDIGO']]) === p.code && String(r[per.col['ID']]) !== p.id && !yes_(r[per.col['ACOMPAÑANTE']]))
+          .map(r => String(r[per.col['NOMBRE']] || '').trim().split(/\s+/)[0]).filter(Boolean)
+      : [];
+    return { id: p.id, etiqueta, con };
+  });
+  return Object.assign(base, { candidatos });
+}
+
+/** Datos del hogar de una persona encontrada. Nunca devuelve respuestas anteriores. */
+function hogar_(personaId) {
+  const per = table_('PERSONAS');
+  const k = findRow_(per, 'ID', String(personaId || ''));
+  if (k < 0) return { ok: false, error: 'not_found' };
+  const code = normCode_(per.rows[k][per.col['CÓDIGO']]);
   const hog = table_('HOGARES');
   const i = findRow_(hog, 'CÓDIGO', code);
-  if (i < 0) { anotarFallo_(); return { ok: false, error: 'code_not_found' }; }
+  if (i < 0) return { ok: false, error: 'not_found' };
+  const v = name => hog.rows[i][hog.col[name]];
 
-  const row = hog.rows[i];
-  const v = name => row[hog.col[name]];
-  const per = table_('PERSONAS');
   const personas = per.rows
     .filter(r => normCode_(r[per.col['CÓDIGO']]) === code && r[per.col['ID']])
     .map(r => ({
       id: String(r[per.col['ID']]),
       nombre: String(r[per.col['NOMBRE']] || '').trim().split(/\s+/)[0],   // solo nombre de pila
       acompanante: yes_(r[per.col['ACOMPAÑANTE']]),
-      _r: r,
     }));
-
   const privada = yes_(v('PREGUNTA PRIVADA')) ? textoPrivado_() : null;
-  const flags = { privada: !!privada, bebes: yes_(v('TIENE BEBÉS')) };
-
-  let respuesta = null;
-  if (yes_(v('RESPONDIDO'))) {
-    respuesta = {
-      personas: personas.map(p => ({
-        id: p.id,
-        asiste: String(p._r[per.col['ASISTE']] || ''),
-        nombre_mas1: String(p._r[per.col['NOMBRE +1']] || ''),
-        menu: String(p._r[per.col['MENÚ']] || ''),
-        alergias: String(p._r[per.col['ALERGIAS']] || ''),
-      })),
-      autobus: String(v('AUTOBÚS') || ''),
-      coche: String(v('COCHE COMPARTIDO') || ''),
-      privada: flags.privada ? String(v('RESPUESTA PRIVADA') || '') : '',
-      bebes: flags.bebes ? String(v('BEBÉS') || '').split(', ').filter(Boolean) : [],
-      mensaje: String(v('MENSAJE') || ''),
-    };
-  }
-
   return {
     ok: true,
-    hogar: String(v('HOGAR') || ''),
-    idioma: String(v('IDIOMA') || '').toLowerCase() === 'en' ? 'en' : 'es',
-    personas: personas.map(({ _r, ...p }) => p),
-    flags,
-    privada,   // { es, en } solo para hogares marcados; null para el resto
-    opciones: { menu: CONFIG.MENU, autobus: opcionesAutobus_(), coche: CONFIG.COCHE, bebes: CONFIG.BEBES },
-    plazo: plazo_(),
-    cerrado: cerrado_(),
-    respuesta,
+    id: String(personaId),
+    personas,
+    flags: { privada: !!privada, bebes: yes_(v('TIENE BEBÉS')) },
+    privada,
+    respondido: yes_(v('RESPONDIDO')),
+    opciones: opciones_(), plazo: plazo_(), cerrado: cerrado_(),
   };
 }
+
+// ───────────────────────── Guardar ─────────────────────────
 
 function submit_(d) {
   if (!d || typeof d !== 'object') return { ok: false, error: 'invalid' };
   // Trampa para bots: campo oculto que una persona nunca rellena. Se finge éxito.
   if (d.website) return { ok: true };
-
-  const code = normCode_(d.code);
-  if (!code) return { ok: false, error: 'code_not_found' };
-  if (demasiadosFallos_()) return { ok: false, error: 'busy' };
+  if (d.tipo !== 'hogar' && d.tipo !== 'pendiente') return { ok: false, error: 'invalid' };
 
   const lock = LockService.getScriptLock();
   try { lock.waitLock(15000); } catch (err) { return { ok: false, error: 'busy' }; }
   try {
-    const hog = table_('HOGARES');
-    const i = findRow_(hog, 'CÓDIGO', code);
-    if (i < 0) { anotarFallo_(); return { ok: false, error: 'code_not_found' }; }
     if (cerrado_()) return { ok: false, error: 'closed' };
-
-    const row = hog.rows[i];
-    const flagPrivada = yes_(row[hog.col['PREGUNTA PRIVADA']]) && !!textoPrivado_();
-    const flagBebes = yes_(row[hog.col['TIENE BEBÉS']]);
-
-    // ── Validación: el servidor no se fía de la página ──
-    const per = table_('PERSONAS');
-    const mias = {};
-    per.rows.forEach((r, j) => {
-      if (normCode_(r[per.col['CÓDIGO']]) === code && r[per.col['ID']]) {
-        mias[String(r[per.col['ID']])] = { j, acompanante: yes_(r[per.col['ACOMPAÑANTE']]) };
-      }
-    });
-    const enviadas = Array.isArray(d.personas) ? d.personas : [];
-    if (!Object.keys(mias).length) return bad_('personas');
-    if (enviadas.length !== Object.keys(mias).length) return bad_('personas');
-
-    const filasPersona = [];
-    for (const p of enviadas) {
-      const m = p && mias[String(p.id)];
-      if (!m) return bad_('personas');
-      if (!['Sí', 'No'].includes(p.asiste)) return bad_('asiste');
-      const va = p.asiste === 'Sí';
-      if (va && !CONFIG.MENU.includes(p.menu)) return bad_('menu');
-      const mas1 = m.acompanante && va ? texto_(p.nombre_mas1) : '';
-      filasPersona.push({ j: m.j, asiste: p.asiste, mas1, menu: va ? p.menu : '', alergias: va ? texto_(p.alergias) : '' });
-    }
-    if (new Set(enviadas.map(p => String(p.id))).size !== enviadas.length) return bad_('personas');
-
-    const vanAlguno = filasPersona.some(p => p.asiste === 'Sí');
-    let autobus = '', coche = '', privada = '', bebes = '';
-    if (vanAlguno) {
-      if (!opcionesAutobus_().includes(d.autobus)) return bad_('autobus');
-      if (!CONFIG.COCHE.includes(d.coche)) return bad_('coche');
-      autobus = d.autobus; coche = d.coche;
-      if (flagPrivada) {
-        if (!['Sí', 'No'].includes(d.privada)) return bad_('privada');
-        privada = d.privada;
-      }
-      if (flagBebes) {
-        const b = Array.isArray(d.bebes) ? d.bebes : [];
-        if (!b.every(x => CONFIG.BEBES.includes(x))) return bad_('bebes');
-        bebes = CONFIG.BEBES.filter(x => b.includes(x)).join(', ');
-      }
-    }
-    const mensaje = texto_(d.mensaje);
-
-    // ── Escritura: SIEMPRE sobre la fila del código (upsert) ──
-    const now = new Date();
-    const n = (Number(row[hog.col['N.º ENVÍOS']]) || 0) + 1;
-    const total = filasPersona.length, si = filasPersona.filter(p => p.asiste === 'Sí').length;
-    setRow_(hog, i, {
-      'RESPONDIDO': '✓',
-      'ASISTEN': si + ' / ' + total,
-      'AUTOBÚS': autobus,
-      'COCHE COMPARTIDO': coche,
-      'RESPUESTA PRIVADA': privada,
-      'BEBÉS': bebes,
-      'MENSAJE': mensaje,
-      'ACTUALIZADO': now,
-      'N.º ENVÍOS': n,
-    });
-    filasPersona.forEach(p => setRow_(per, p.j, {
-      'ASISTE': p.asiste, 'NOMBRE +1': p.mas1, 'MENÚ': p.menu, 'ALERGIAS': p.alergias,
-    }));
-
-    const idioma = d.idioma === 'en' ? 'en' : 'es';
-    sheet_('LOG').appendRow([now, code, idioma, JSON.stringify({
-      personas: filasPersona.map(p => ({ id: per.rows[p.j][per.col['ID']], asiste: p.asiste, mas1: p.mas1, menu: p.menu, alergias: p.alergias })),
-      autobus, coche, privada, bebes, mensaje,
-    })]);
-    SpreadsheetApp.flush();
-    return { ok: true, envios: n, actualizado: now.toISOString() };
+    return d.tipo === 'hogar' ? guardarHogar_(d) : guardarPendiente_(d);
   } finally {
     lock.releaseLock();
   }
+}
+
+/** Datos comunes del hogar (bus, coche…), solo si alguien viene. */
+function extras_(d, vanAlguno, flagPrivada, flagBebes) {
+  const out = { autobus: '', coche: '', privada: '', bebes: '' };
+  if (!vanAlguno) return out;
+  if (!opciones_().autobus.includes(d.autobus)) return { error: 'autobus' };
+  if (!CONFIG.COCHE.includes(d.coche)) return { error: 'coche' };
+  out.autobus = d.autobus; out.coche = d.coche;
+  if (flagPrivada) {
+    if (!['Sí', 'No'].includes(d.privada)) return { error: 'privada' };
+    out.privada = d.privada;
+  }
+  if (flagBebes) {
+    const b = Array.isArray(d.bebes) ? d.bebes : [];
+    if (!b.every(x => CONFIG.BEBES.includes(x))) return { error: 'bebes' };
+    out.bebes = CONFIG.BEBES.filter(x => b.includes(x)).join(', ');
+  }
+  return out;
+}
+
+/** Valida una persona (asiste / menú / alergias). Devuelve null si no es válida. */
+function persona_(p) {
+  if (!p || !['Sí', 'No'].includes(p.asiste)) return null;
+  const va = p.asiste === 'Sí';
+  if (va && !CONFIG.MENU.includes(p.menu)) return null;
+  return { asiste: p.asiste, menu: va ? p.menu : '', alergias: va ? texto_(p.alergias) : '' };
+}
+
+function guardarHogar_(d) {
+  const per = table_('PERSONAS');
+  const k = findRow_(per, 'ID', String(d.id || ''));
+  if (k < 0) return { ok: false, error: 'not_found' };
+  const code = normCode_(per.rows[k][per.col['CÓDIGO']]);
+  const hog = table_('HOGARES');
+  const i = findRow_(hog, 'CÓDIGO', code);
+  if (i < 0) return { ok: false, error: 'not_found' };
+  const row = hog.rows[i];
+
+  // El envío debe traer a TODAS las personas del hogar, una vez cada una, y a nadie más.
+  const mias = {};
+  per.rows.forEach((r, j) => {
+    if (normCode_(r[per.col['CÓDIGO']]) === code && r[per.col['ID']]) {
+      mias[String(r[per.col['ID']])] = { j, acompanante: yes_(r[per.col['ACOMPAÑANTE']]) };
+    }
+  });
+  const enviadas = Array.isArray(d.personas) ? d.personas : [];
+  if (!Object.keys(mias).length || enviadas.length !== Object.keys(mias).length) return bad_('personas');
+  if (new Set(enviadas.map(p => String(p && p.id))).size !== enviadas.length) return bad_('personas');
+
+  const filas = [];
+  for (const p of enviadas) {
+    const m = mias[String(p.id)];
+    const ok = persona_(p);
+    if (!m || !ok) return bad_('personas');
+    filas.push(Object.assign(ok, { j: m.j, mas1: m.acompanante && ok.asiste === 'Sí' ? texto_(p.nombre_mas1) : '' }));
+  }
+  const vanAlguno = filas.some(p => p.asiste === 'Sí');
+  const ex = extras_(d, vanAlguno, yes_(row[hog.col['PREGUNTA PRIVADA']]) && !!textoPrivado_(), yes_(row[hog.col['TIENE BEBÉS']]));
+  if (ex.error) return bad_(ex.error);
+  const mensaje = texto_(d.mensaje);
+  const quien = String(per.rows[k][per.col['NOMBRE']] || '') + ' ' + String(per.rows[k][per.col['APELLIDOS']] || '');
+
+  const now = new Date();
+  const n = (Number(row[hog.col['N.º ENVÍOS']]) || 0) + 1;
+  setRow_(hog, i, {
+    'RESPONDIDO': '✓',
+    'RESPONDIÓ': quien.trim(),
+    'ASISTEN': filas.filter(p => p.asiste === 'Sí').length + ' / ' + filas.length,
+    'AUTOBÚS': ex.autobus, 'COCHE COMPARTIDO': ex.coche, 'RESPUESTA PRIVADA': ex.privada, 'BEBÉS': ex.bebes,
+    'MENSAJE': mensaje, 'ACTUALIZADO': now, 'N.º ENVÍOS': n,
+  });
+  filas.forEach(p => setRow_(per, p.j, { 'ASISTE': p.asiste, 'NOMBRE +1': p.mas1, 'MENÚ': p.menu, 'ALERGIAS': p.alergias }));
+  log_(now, 'hogar', code, d.idioma, {
+    respondio: quien.trim(),
+    personas: filas.map(p => ({ id: per.rows[p.j][per.col['ID']], asiste: p.asiste, mas1: p.mas1, menu: p.menu, alergias: p.alergias })),
+    autobus: ex.autobus, coche: ex.coche, privada: ex.privada, bebes: ex.bebes, mensaje,
+  });
+  return { ok: true, envios: n, actualizado: now.toISOString() };
+}
+
+/** No está en la lista: una fila en PENDIENTES por persona que escribe (misma persona = misma fila). */
+function guardarPendiente_(d) {
+  const nombre = texto_(d.nombre).slice(0, 80), apellidos = texto_(d.apellidos).slice(0, 80);
+  const clave = tokens_(nombre).concat(tokens_(apellidos)).join(' ');
+  if (!tokens_(nombre).length || !tokens_(apellidos).length) return bad_('nombre');
+
+  const enviadas = Array.isArray(d.personas) ? d.personas : [];
+  if (!enviadas.length || enviadas.length > CONFIG.MAX_PERSONAS_PENDIENTE) return bad_('personas');
+  const filas = [];
+  for (const p of enviadas) {
+    const ok = persona_(p);
+    const quien = texto_(p && p.nombre).slice(0, 120);
+    if (!ok || !quien) return bad_('personas');
+    filas.push(Object.assign(ok, { nombre: quien }));
+  }
+  const vanAlguno = filas.some(p => p.asiste === 'Sí');
+  const ex = extras_(d, vanAlguno, false, false);
+  if (ex.error) return bad_(ex.error);
+  const mensaje = texto_(d.mensaje);
+
+  const pen = table_('PENDIENTES');
+  let i = findRow_(pen, 'CLAVE', clave);
+  if (i < 0) { appendObj_(pen, { 'CLAVE': clave }); i = pen.rows.length - 1; }
+  const now = new Date();
+  const n = (Number(pen.rows[i][pen.col['N.º ENVÍOS']]) || 0) + 1;
+  setRow_(pen, i, {
+    'NOMBRE ESCRITO': (nombre + ' ' + apellidos).trim(),
+    'PERSONAS': filas.map(p => [p.nombre, p.asiste, p.menu, p.alergias].filter(Boolean).join(' — ')).join(' | '),
+    'ASISTEN': filas.filter(p => p.asiste === 'Sí').length + ' / ' + filas.length,
+    'AUTOBÚS': ex.autobus, 'COCHE COMPARTIDO': ex.coche, 'MENSAJE': mensaje,
+    'ACTUALIZADO': now, 'N.º ENVÍOS': n,
+  });
+  log_(now, 'pendiente', clave, d.idioma, { personas: filas, autobus: ex.autobus, coche: ex.coche, mensaje });
+  return { ok: true, envios: n, actualizado: now.toISOString() };
 }
 
 // ───────────────────────── Menú de la hoja ─────────────────────────
 
 function onOpen() {
   SpreadsheetApp.getUi().createMenu('Boda')
-    .addItem('Generar códigos y enlaces', 'generarCodigos')
+    .addItem('Preparar invitados', 'prepararInvitados')
     .addSeparator()
     .addItem('Preparar hoja (primera vez)', 'setup')
     .addItem('Prueba automática', 'selfTest')
     .addToUi();
 }
 
-/** Crea las pestañas que falten con sus cabeceras y un hogar de prueba (TEST01). No borra nada. */
+/** Crea las pestañas que falten con sus cabeceras y un hogar de prueba (Ana y Bruno Prueba). */
 function setup() {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
   Object.keys(H).forEach(name => {
-    let sh = ss.getSheetByName(name);
-    if (!sh) {
-      sh = ss.insertSheet(name);
+    if (!ss.getSheetByName(name)) {
+      const sh = ss.insertSheet(name);
       sh.getRange(1, 1, 1, H[name].length).setValues([H[name]]).setFontWeight('bold');
       sh.setFrozenRows(1);
     }
@@ -237,102 +362,128 @@ function setup() {
   if (findRow_(textos, 'CLAVE', 'PREGUNTA_PRIVADA') < 0) {
     textos.sh.appendRow(['PREGUNTA_PRIVADA', '', '']);   // la pareja escribe aquí la pregunta (ES / EN)
   }
-  const hog = table_('HOGARES');
-  if (findRow_(hog, 'CÓDIGO', 'TEST01') < 0) {
-    appendObj_(hog, { 'CÓDIGO': 'TEST01', 'HOGAR': 'Prueba (borrar)', 'IDIOMA': 'es', 'PREGUNTA PRIVADA': '✓', 'TIENE BEBÉS': '✓' });
-    const per = table_('PERSONAS');
-    appendObj_(per, { 'HOGAR': 'Prueba (borrar)', 'NOMBRE': 'Ana Prueba', 'CÓDIGO': 'TEST01', 'ID': 'TEST01-1' });
-    appendObj_(per, { 'HOGAR': 'Prueba (borrar)', 'NOMBRE': 'Bruno Prueba', 'CÓDIGO': 'TEST01', 'ID': 'TEST01-2' });
-    appendObj_(per, { 'HOGAR': 'Prueba (borrar)', 'NOMBRE': '+1', 'ACOMPAÑANTE': '✓', 'CÓDIGO': 'TEST01', 'ID': 'TEST01-3' });
-    generarCodigos(true);
+  const per = table_('PERSONAS');
+  if (findRow_(per, 'HOGAR', 'Prueba (borrar)') < 0) {
+    appendObj_(per, { 'HOGAR': 'Prueba (borrar)', 'NOMBRE': 'Ana', 'APELLIDOS': 'Prueba Test' });
+    appendObj_(per, { 'HOGAR': 'Prueba (borrar)', 'NOMBRE': 'Bruno', 'APELLIDOS': 'Prueba Test' });
+    appendObj_(per, { 'HOGAR': 'Prueba (borrar)', 'NOMBRE': '+1', 'ACOMPAÑANTE': '✓' });
+    prepararInvitados(true);
+    const hog = table_('HOGARES');
+    setRow_(hog, findRow_(hog, 'HOGAR', 'Prueba (borrar)'), { 'PREGUNTA PRIVADA': '✓', 'TIENE BEBÉS': '✓' });
   }
 }
 
 /**
- * Da código a cada hogar que no lo tenga, rellena ENLACE, y enlaza PERSONAS con su hogar
- * por la columna HOGAR (por eso el nombre de cada hogar tiene que ser único).
- * Nunca cambia un código ya asignado.
+ * Se rellena PERSONAS (HOGAR, NOMBRE, APELLIDOS, ALIAS, ACOMPAÑANTE) y este menú hace el resto:
+ *  · persona sin HOGAR → su propio hogar («Nombre Apellidos»)
+ *  · cada HOGAR nuevo → una fila en HOGARES (donde se marcan PREGUNTA PRIVADA / TIENE BEBÉS)
+ *  · clave interna por hogar e ID por persona (nunca cambia una ya asignada)
+ * Se puede repetir cuantas veces se quiera.
  */
-function generarCodigos(silencioso) {
+function prepararInvitados(silencioso) {
+  const per = table_('PERSONAS');
   const hog = table_('HOGARES');
   const avisos = [];
-  const usados = new Set(hog.rows.map(r => normCode_(r[hog.col['CÓDIGO']])).filter(Boolean));
-  const porHogar = {};
-  let nuevos = 0;
 
-  hog.rows.forEach((r, i) => {
-    const nombre = String(r[hog.col['HOGAR']] || '').trim();
+  per.rows.forEach((r, j) => {
+    const nombre = String(r[per.col['NOMBRE']] || '').trim();
     if (!nombre) return;
-    if (porHogar[nombre]) { avisos.push('Hogar repetido: «' + nombre + '»'); return; }
-    let code = normCode_(r[hog.col['CÓDIGO']]);
-    if (!code) {
-      do { code = nuevoCodigo_(); } while (usados.has(code));
-      usados.add(code); nuevos++;
+    const plus = yes_(r[per.col['ACOMPAÑANTE']]);
+    if (!String(r[per.col['HOGAR']] || '').trim()) {
+      if (plus) { avisos.push('Acompañante sin HOGAR (fila ' + (j + 2) + ')'); return; }
+      setRow_(per, j, { 'HOGAR': (nombre + ' ' + String(r[per.col['APELLIDOS']] || '')).trim() });
     }
-    porHogar[nombre] = code;
-    const en = String(r[hog.col['IDIOMA']] || '').toLowerCase() === 'en';
-    setRow_(hog, i, { 'CÓDIGO': code, 'ENLACE': CONFIG.SITE_URL + '?c=' + code + (en ? '&lang=en' : '') + '#rsvp' });
+    if (!plus && !String(r[per.col['APELLIDOS']] || '').trim()) {
+      avisos.push('Sin apellidos, no se le podrá encontrar: «' + nombre + '» (fila ' + (j + 2) + ')');
+    }
   });
 
-  const per = table_('PERSONAS');
+  const usados = new Set(hog.rows.map(r => normCode_(r[hog.col['CÓDIGO']])).filter(Boolean));
+  const nuevo = () => { let c; do { c = ''; for (let k = 0; k < 6; k++) c += ALFABETO[Math.floor(Math.random() * ALFABETO.length)]; } while (usados.has(c)); usados.add(c); return c; };
+  const porHogar = {};
+  hog.rows.forEach((r, i) => {
+    const h = String(r[hog.col['HOGAR']] || '').trim();
+    if (!h) return;
+    if (porHogar[h]) { avisos.push('Hogar repetido en HOGARES: «' + h + '»'); return; }
+    let c = normCode_(r[hog.col['CÓDIGO']]);
+    if (!c) { c = nuevo(); setRow_(hog, i, { 'CÓDIGO': c }); }
+    porHogar[h] = c;
+  });
+  let nuevosHogares = 0;
+  per.rows.forEach(r => {
+    const h = String(r[per.col['HOGAR']] || '').trim();
+    if (h && !porHogar[h]) { porHogar[h] = nuevo(); appendObj_(hog, { 'CÓDIGO': porHogar[h], 'HOGAR': h }); nuevosHogares++; }
+  });
+
   const contador = {};
-  per.rows.forEach(r => {   // numeración existente, para no repetir ID
-    const id = String(r[per.col['ID']] || ''), m = id.match(/^(.+)-(\d+)$/);
+  per.rows.forEach(r => {
+    const m = String(r[per.col['ID']] || '').match(/^(.+)-(\d+)$/);
     if (m) contador[m[1]] = Math.max(contador[m[1]] || 0, Number(m[2]));
   });
   per.rows.forEach((r, j) => {
-    const nombre = String(r[per.col['HOGAR']] || '').trim();
-    if (!nombre) return;
-    const code = porHogar[nombre];
-    if (!code) { avisos.push('Persona sin hogar en HOGARES: «' + nombre + '» (fila ' + (j + 2) + ')'); return; }
+    const h = String(r[per.col['HOGAR']] || '').trim();
+    if (!h || !String(r[per.col['NOMBRE']] || '').trim()) return;
+    const c = porHogar[h];
     const id = String(r[per.col['ID']] || '');
-    const cambios = { 'CÓDIGO': code };
-    if (!id || id.split('-')[0] !== code) {
-      contador[code] = (contador[code] || 0) + 1;
-      cambios['ID'] = code + '-' + contador[code];
-    }
+    const cambios = { 'CÓDIGO': c };
+    if (!id || id.split('-')[0] !== c) { contador[c] = (contador[c] || 0) + 1; cambios['ID'] = c + '-' + contador[c]; }
     setRow_(per, j, cambios);
   });
 
+  // Nombres idénticos en la lista: la web preguntará «¿cuál eres?» y enseñará con quién va cada uno.
+  const vistos = {};
+  per.rows.forEach(r => {
+    if (yes_(r[per.col['ACOMPAÑANTE']])) return;
+    const k = tokens_(r[per.col['NOMBRE']]).concat(tokens_(r[per.col['APELLIDOS']])).join(' ');
+    if (k) vistos[k] = (vistos[k] || 0) + 1;
+  });
+  Object.keys(vistos).filter(k => vistos[k] > 1).forEach(k => avisos.push('Nombre repetido (se distinguirán por su hogar): «' + k + '»'));
+
   if (!silencioso) {
-    SpreadsheetApp.getUi().alert(
-      nuevos + ' código(s) nuevo(s).' + (avisos.length ? '\n\nRevisar:\n· ' + avisos.join('\n· ') : '\n\nTodo en orden.'));
+    SpreadsheetApp.getUi().alert(nuevosHogares + ' hogar(es) nuevo(s).' +
+      (avisos.length ? '\n\nRevisar:\n· ' + avisos.join('\n· ') : '\n\nTodo en orden.'));
   }
-  return { nuevos, avisos };
+  return { nuevosHogares, avisos };
 }
 
-/** Comprueba que reenviar actualiza la misma fila y que se rechaza lo inválido. Usa TEST01. */
+/** Comprueba la búsqueda, que reenviar actualiza la misma fila y que se rechaza lo inválido. */
 function selfTest() {
   setup();
-  const base = () => ({
-    code: 'test01', idioma: 'es',
-    personas: [
-      { id: 'TEST01-1', asiste: 'Sí', menu: 'Adulto', alergias: 'Ninguna' },
-      { id: 'TEST01-2', asiste: 'Sí', menu: 'Vegetariano', alergias: '' },
-      { id: 'TEST01-3', asiste: 'No' },
-    ],
-    autobus: opcionesAutobus_()[0], coche: 'No', privada: 'Sí', bebes: ['Trona'], mensaje: '=prueba',
-  });
-  const celda = name => { const t = table_('HOGARES'); return t.rows[findRow_(t, 'CÓDIGO', 'TEST01')][t.col[name]]; };
-  const filas = () => { const t = table_('HOGARES'); return t.rows.filter(r => normCode_(r[t.col['CÓDIGO']]) === 'TEST01').length; };
-  const envios = () => Number(celda('N.º ENVÍOS')) || 0;
-
   const res = [];
   const check = (nombre, cond) => res.push((cond ? '✓ ' : '✗ ') + nombre);
-  const n0 = envios();
-  check('envío válido', submit_(base()).ok);
-  const b2 = base(); b2.personas[1].asiste = 'No';
-  check('reenvío válido', submit_(b2).ok);
-  check('una sola fila para TEST01', filas() === 1);
-  check('contador +2', envios() === n0 + 2);
-  check('código inexistente', submit_(Object.assign(base(), { code: 'ZZZZZZ' })).error === 'code_not_found');
-  check('menú no válido', submit_((() => { const b = base(); b.personas[0].menu = 'Pizza'; return b; })()).error === 'invalid');
-  check('persona ajena', submit_((() => { const b = base(); b.personas[0].id = 'OTRO-1'; return b; })()).error === 'invalid');
-  check('trampa de bots no escribe', submit_(Object.assign(base(), { website: 'x' })).ok && envios() === n0 + 2);
-  check('fórmula guardada como texto', celda('MENSAJE') === '=prueba');   // el ' inicial lo oculta Sheets
-  const l = lookup_('test01');
-  check('lookup devuelve respuesta previa', l.ok && l.respuesta && l.respuesta.personas[1].asiste === 'No');
-  check('lookup solo nombres de pila', l.personas.every(p => !/\s/.test(p.nombre)));
+  const hogT = () => { const t = table_('HOGARES'); return { t, i: findRow_(t, 'HOGAR', 'Prueba (borrar)') }; };
+  const celda = name => { const { t, i } = hogT(); return t.rows[i][t.col[name]]; };
+
+  const b1 = buscar_('ana', 'prueba');
+  check('encuentra «ana prueba»', b1.ok && b1.candidatos.length === 1);
+  const b2 = buscar_('Anna', 'Pruebaa');
+  check('tolera erratas', b2.candidatos.length === 1 && b2.candidatos[0].id === b1.candidatos[0].id);
+  check('no encuentra «Zoe Zzzz»', buscar_('Zoe', 'Zzzz').candidatos.length === 0);
+  check('sin apellido no busca', buscar_('Ana', '').candidatos.length === 0);
+
+  const id = b1.candidatos[0].id;
+  const h = hogar_(id);
+  check('hogar con 3 personas', h.ok && h.personas.length === 3);
+  check('hogar sin respuestas previas', !('respuesta' in h));
+  const envio = () => ({
+    tipo: 'hogar', id, idioma: 'es',
+    personas: h.personas.map((p, k) => k === 0 ? { id: p.id, asiste: 'Sí', menu: 'Adulto', alergias: '=prueba' } : { id: p.id, asiste: 'No' }),
+    autobus: opciones_().autobus[0], coche: 'No', privada: 'Sí', bebes: ['Trona'], mensaje: 'hola',
+  });
+  const n0 = Number(celda('N.º ENVÍOS')) || 0;
+  check('envío válido', submit_(envio()).ok);
+  check('reenvío válido', submit_(envio()).ok);
+  check('una sola fila del hogar', table_('HOGARES').rows.filter(r => String(r[1]) === 'Prueba (borrar)').length === 1);
+  check('contador +2', Number(celda('N.º ENVÍOS')) === n0 + 2);
+  check('menú no válido', submit_((() => { const e = envio(); e.personas[0].menu = 'Pizza'; return e; })()).error === 'invalid');
+  check('falta una persona', submit_((() => { const e = envio(); e.personas.pop(); return e; })()).error === 'invalid');
+  check('persona inexistente', submit_(Object.assign(envio(), { id: 'NOPE-1' })).error === 'not_found');
+  check('trampa de bots no escribe', submit_(Object.assign(envio(), { website: 'x' })).ok && Number(celda('N.º ENVÍOS')) === n0 + 2);
+
+  const pend = { tipo: 'pendiente', nombre: 'Zoe', apellidos: 'Pruebaprueba', personas: [{ nombre: 'Zoe', asiste: 'No' }], mensaje: '' };
+  const pc = () => table_('PENDIENTES').rows.filter(r => r[0] === 'zoe pruebaprueba').length;
+  submit_(pend); submit_(Object.assign({}, pend, { nombre: 'zoé', apellidos: 'PRUEBAPRUEBA' }));
+  check('pendiente: una fila aunque cambie la grafía', pc() === 1);
 
   const out = res.join('\n');
   Logger.log(out);
@@ -346,23 +497,19 @@ function json_(obj) {
   return ContentService.createTextOutput(JSON.stringify(obj)).setMimeType(ContentService.MimeType.JSON);
 }
 function bad_(campo) { return { ok: false, error: 'invalid', campo }; }
-
 function normCode_(c) { return String(c == null ? '' : c).toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 12); }
-function nuevoCodigo_() {
-  let s = '';
-  for (let k = 0; k < LARGO_CODIGO; k++) s += ALFABETO[Math.floor(Math.random() * ALFABETO.length)];
-  return s;
-}
 function yes_(v) { return v === true || /^(✓|✔|x|s[ií]|y|yes|1|true)$/i.test(String(v == null ? '' : v).trim()); }
 
-/** Texto libre: recortado, limitado y sin fórmulas (= + - @ al inicio se escapan con '). */
+/** Texto libre: recortado, limitado y guardado siempre como texto (nunca como fórmula). */
 function texto_(s) {
   let t = String(s == null ? '' : s).replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g, '').trim().slice(0, CONFIG.MAX_TEXTO);
   if (/^[=+\-@]/.test(t)) t = "'" + t;
   return t;
 }
 
-function opcionesAutobus_() { return CONFIG.AUTOBUS.length ? CONFIG.AUTOBUS.concat('No') : ['Sí', 'No']; }
+function opciones_() {
+  return { menu: CONFIG.MENU, autobus: CONFIG.AUTOBUS.length ? CONFIG.AUTOBUS.concat('No') : ['Sí', 'No'], coche: CONFIG.COCHE, bebes: CONFIG.BEBES };
+}
 
 function textoPrivado_() {
   const t = table_('TEXTOS'), i = findRow_(t, 'CLAVE', 'PREGUNTA_PRIVADA');
@@ -381,12 +528,17 @@ function cerrado_() {
   return !!d && Date.now() > Date.parse(d + 'T23:59:59+02:00');
 }
 
-function demasiadosFallos_() {
-  return Number(CacheService.getScriptCache().get('fallos') || 0) >= CONFIG.MAX_FALLOS;
-}
-function anotarFallo_() {
+/** Contador con ventana de 10 min en la caché del script. */
+function contar_(clave) {
   const c = CacheService.getScriptCache();
-  c.put('fallos', String(Number(c.get('fallos') || 0) + 1), 600);
+  const n = Number(c.get(clave) || 0) + 1;
+  c.put(clave, String(n), 600);
+  return n;
+}
+
+function log_(fecha, tipo, ref, idioma, datos) {
+  sheet_('LOG').appendRow([fecha, tipo, ref, idioma === 'en' ? 'en' : 'es', JSON.stringify(datos)]);
+  SpreadsheetApp.flush();
 }
 
 function sheet_(name) {
@@ -405,8 +557,9 @@ function table_(name) {
 }
 function findRow_(t, colName, value) {
   const k = t.col[colName];
-  const want = colName === 'CÓDIGO' ? normCode_(value) : String(value);
-  return t.rows.findIndex(r => (colName === 'CÓDIGO' ? normCode_(r[k]) : String(r[k])) === want);
+  const isCode = colName === 'CÓDIGO';
+  const want = isCode ? normCode_(value) : String(value);
+  return t.rows.findIndex(r => (isCode ? normCode_(r[k]) : String(r[k])) === want);
 }
 /** Escribe varias celdas de una fila (i = índice en t.rows) y mantiene t.rows al día. */
 function setRow_(t, i, obj) {
