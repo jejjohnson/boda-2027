@@ -1,0 +1,41 @@
+/* RSVP · complementa los estilos de formulario de index.html (label, input, .radios, .card) */
+[hidden]{display:none!important}
+#rsvp-app{max-width:560px;margin:0 auto;display:grid;gap:16px}
+#rsvp form{max-width:none}
+#rsvp legend{
+  float:left;width:100%;padding:0;margin-bottom:8px;
+  font-size:12.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--burgundy);font-weight:500;
+}
+#rsvp legend + *{clear:both}
+#rsvp fieldset{min-width:0}
+#rsvp .rsvp-person legend.rsvp-name{
+  font-family:"Caveat",cursive;font-weight:700;font-size:clamp(26px,6.5vw,30px);
+  letter-spacing:0;text-transform:none;line-height:1.1;
+}
+#rsvp legend.rsvp-free{text-transform:none;letter-spacing:0;font-size:15px;font-weight:500}
+#rsvp .if-yes,#rsvp .rsvp-household{display:grid;gap:16px}
+#rsvp .if-yes{margin-top:16px;padding-top:16px;border-top:1px dashed rgba(168,47,78,.35)}
+#rsvp .radios label:has(input:checked){border-color:var(--burgundy);background:rgba(168,47,78,.07)}
+#rsvp .radios input{accent-color:var(--burgundy)}
+#rsvp .missing .radios label,#rsvp .missing.rsvp-person{border-color:#C0392B}
+#rsvp .missing > legend{color:#C0392B}
+#rsvp .rsvp-hello{
+  text-align:center;font-family:"Caveat",cursive;font-weight:700;color:var(--burgundy);
+  font-size:clamp(30px,8vw,38px);line-height:1.1;
+}
+#rsvp .rsvp-deadline{margin-bottom:0}
+#rsvp .rsvp-code p{font-size:14.5px;margin-bottom:14px}
+#rsvp .rsvp-code-row{display:flex;gap:10px;align-items:center}
+#rsvp .rsvp-code-row input{
+  flex:1 1 auto;min-width:0;font-size:18px;letter-spacing:.2em;text-transform:uppercase;text-align:center;
+}
+#rsvp .rsvp-code-row .btn{flex:0 0 auto;padding-left:22px;padding-right:22px}
+#rsvp .rsvp-actions{display:grid;gap:10px;justify-items:center;margin-top:6px}
+#rsvp .rsvp-msg{font-size:13.5px;color:var(--muted);text-align:center;font-style:italic}
+#rsvp .rsvp-msg:empty{display:none}
+#rsvp .rsvp-msg.err{color:#C0392B;font-style:normal}
+#rsvp .rsvp-msg.ok{color:var(--burgundy);font-style:normal}
+#rsvp .rsvp-thanks{text-align:center;display:grid;gap:10px;justify-items:center}
+#rsvp .rsvp-hp{position:absolute;left:-9999px;width:1px;height:1px;opacity:0}
+#rsvp .btn[disabled]{opacity:.55;cursor:wait}
+#rsvp .radios.stack label{flex-basis:100%}

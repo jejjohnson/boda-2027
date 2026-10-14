@@ -1,3 +1,14 @@
 .DS_Store
 Icon
 Icon?
+
+# Datos de invitados: viven en la hoja de Google y en la carpeta privada 2027_boda, nunca aquí
+*.csv
+*.tsv
+*.xlsx
+*.xls
+*.ods
+*.numbers
+*invitados*
+*guests*
+*codigos*
