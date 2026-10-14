@@ -6,6 +6,9 @@ Sitio estático, sin dependencias ni build. Todo lo que hay aquí es **público*
 |---|---|
 | `index.html` | La web completa (bilingüe ES/EN, `?lang=en` abre en inglés) |
 | `save-the-date/` | La tarjeta save-the-date y sus imágenes 1080×1920 para WhatsApp |
+| `rsvp/` | Formulario RSVP de la web (oculto hasta poner la URL en `rsvp/config.js`) |
+| `apps-script/` | Backend del RSVP en Google Apps Script + guía de puesta en marcha |
+| `docs/rsvp-design.md` | Diseño del RSVP: arquitectura, datos, seguridad |
 
 ## Publicar
 
@@ -22,4 +25,13 @@ git add -A && git commit -m "Actualizar horarios" && git push
 - Lo que no está decidido lleva la etiqueta «por confirmar», no se inventa.
 - Los datos privados (lista de invitados, contratos) viven en la carpeta `2027_boda`, **no** en este repo.
 
-El formulario RSVP es una demo en GitHub Pages (no envía nada). Ver `PLAN_HOSTING_RSVP.md` en la carpeta del proyecto.
+## RSVP
+
+Un solo enlace para todos: cada invitado busca su nombre y responde por su hogar. Las
+respuestas van a una hoja de Google privada a través de un Apps Script: sin contraseñas ni
+claves en el repo, y **una fila por hogar** (reenviar actualiza, no duplica). Quien no aparece
+en la lista puede responder igualmente y queda en «PENDIENTES» para revisarlo.
+Puesta en marcha: [`apps-script/README.md`](apps-script/README.md).
+Probar sin tocar la hoja: `?mock=1` (busca «Ana Prueba», «Lucía García» o «Maika Ruiz»).
+
+- Nunca subir aquí la lista de invitados (el `.gitignore` bloquea las exportaciones).
